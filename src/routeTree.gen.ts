@@ -13,6 +13,7 @@ import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
 const TutorRoute = TutorRouteImport.update({
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubjectsSubjectIdRoute = SubjectsSubjectIdRouteImport.update({
+  id: '/$subjectId',
+  path: '/$subjectId',
+  getParentRoute: () => SubjectsRoute,
+} as any)
 const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
   id: '/api/public/chat',
   path: '/api/public/chat',
@@ -44,43 +50,59 @@ const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/subjects': typeof SubjectsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/subjects': typeof SubjectsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/subjects': typeof SubjectsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/leaderboard' | '/subjects' | '/tutor' | '/api/public/chat'
+  fullPaths:
+    | '/'
+    | '/leaderboard'
+    | '/subjects'
+    | '/tutor'
+    | '/subjects/$subjectId'
+    | '/api/public/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/leaderboard' | '/subjects' | '/tutor' | '/api/public/chat'
+  to:
+    | '/'
+    | '/leaderboard'
+    | '/subjects'
+    | '/tutor'
+    | '/subjects/$subjectId'
+    | '/api/public/chat'
   id:
     | '__root__'
     | '/'
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
+    | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LeaderboardRoute: typeof LeaderboardRoute
-  SubjectsRoute: typeof SubjectsRoute
+  SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
 }
@@ -115,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/subjects/$subjectId': {
+      id: '/subjects/$subjectId'
+      path: '/$subjectId'
+      fullPath: '/subjects/$subjectId'
+      preLoaderRoute: typeof SubjectsSubjectIdRouteImport
+      parentRoute: typeof SubjectsRoute
+    }
     '/api/public/chat': {
       id: '/api/public/chat'
       path: '/api/public/chat'
@@ -125,10 +154,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SubjectsRouteChildren {
+  SubjectsSubjectIdRoute: typeof SubjectsSubjectIdRoute
+}
+
+const SubjectsRouteChildren: SubjectsRouteChildren = {
+  SubjectsSubjectIdRoute: SubjectsSubjectIdRoute,
+}
+
+const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
+  SubjectsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LeaderboardRoute: LeaderboardRoute,
-  SubjectsRoute: SubjectsRoute,
+  SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
 }

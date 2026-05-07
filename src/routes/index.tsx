@@ -106,7 +106,7 @@ function HomePage() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SUBJECTS.slice(0, 6).map((s) => (
-            <Link key={s.id} to="/subjects"
+            <Link key={s.id} to="/subjects/$subjectId" params={{ subjectId: s.id }}
               className="group relative overflow-hidden rounded-2xl bg-gradient-card p-5 border border-white/5 hover:border-white/20 hover:-translate-y-1 transition-all">
               <div
                 className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-2xl"

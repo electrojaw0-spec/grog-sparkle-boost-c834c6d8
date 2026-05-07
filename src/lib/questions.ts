@@ -1,0 +1,122 @@
+export interface Question {
+  id: string;
+  q: string;
+  options: string[];
+  answer: number; // index
+  explain: string;
+  topic: string;
+}
+
+const M = (id: string, q: string, options: string[], answer: number, explain: string, topic: string): Question =>
+  ({ id, q, options, answer, explain, topic });
+
+export const QUESTIONS: Record<string, Question[]> = {
+  mathematics: [
+    M("m1", "Simplify: 3(2x − 4) + 5x", ["11x − 12", "6x − 4", "11x − 4", "x − 12"], 0, "6x − 12 + 5x = 11x − 12.", "Algebra"),
+    M("m2", "Solve for x: 2x + 7 = 19", ["5", "6", "7", "12"], 1, "2x = 12 → x = 6.", "Algebra"),
+    M("m3", "Area of a circle with radius 7 (π = 22/7)", ["44", "154", "49", "22"], 1, "πr² = 22/7 × 49 = 154.", "Geometry"),
+    M("m4", "If sin θ = 0.5, what is θ (acute)?", ["30°", "45°", "60°", "90°"], 0, "sin 30° = 0.5.", "Trigonometry"),
+    M("m5", "Mean of 4, 8, 6, 10, 12", ["7", "8", "9", "10"], 1, "Sum 40 / 5 = 8.", "Statistics"),
+    M("m6", "Factorize: x² − 9", ["(x−3)²", "(x−3)(x+3)", "(x+3)²", "x(x−9)"], 1, "Difference of squares.", "Algebra"),
+    M("m7", "Derivative of 3x²", ["3x", "6x", "x²", "6"], 1, "d/dx(3x²) = 6x.", "Calculus"),
+    M("m8", "log₁₀ 1000", ["1", "2", "3", "10"], 2, "10³ = 1000.", "Algebra"),
+    M("m9", "Probability of even number on a die", ["1/6", "1/3", "1/2", "2/3"], 2, "3 of 6 outcomes.", "Statistics"),
+    M("m10", "Sum of angles in a triangle", ["90°", "180°", "270°", "360°"], 1, "Always 180°.", "Geometry"),
+  ],
+  english: [
+    M("e1", "Choose the synonym of ABUNDANT", ["Scarce", "Plentiful", "Empty", "Tiny"], 1, "Abundant = plentiful.", "Lexis"),
+    M("e2", "Antonym of BRAVE", ["Bold", "Cowardly", "Strong", "Noble"], 1, "Brave ↔ cowardly.", "Lexis"),
+    M("e3", "Identify the noun: 'The quick fox jumps.'", ["Quick", "Fox", "Jumps", "The"], 1, "Fox is the noun.", "Grammar"),
+    M("e4", "Past tense of 'go'", ["Goed", "Gone", "Went", "Going"], 2, "Went.", "Grammar"),
+    M("e5", "Plural of 'child'", ["Childs", "Childrens", "Children", "Childes"], 2, "Children.", "Grammar"),
+    M("e6", "A figure of speech comparing using 'like' or 'as'", ["Metaphor", "Simile", "Hyperbole", "Irony"], 1, "Simile.", "Devices"),
+    M("e7", "Choose correctly spelled word", ["Recieve", "Receive", "Receeve", "Receeve"], 1, "I before E except after C.", "Spelling"),
+    M("e8", "'He ___ to school every day.' Fill the blank.", ["go", "goes", "going", "gone"], 1, "Third-person singular.", "Grammar"),
+    M("e9", "Opposite of 'ancient'", ["Old", "Modern", "Past", "Historic"], 1, "Modern.", "Lexis"),
+    M("e10", "Identify the adverb: 'She sings beautifully.'", ["She", "Sings", "Beautifully", "None"], 2, "Beautifully modifies verb.", "Grammar"),
+  ],
+  physics: [
+    M("p1", "SI unit of force", ["Joule", "Newton", "Watt", "Pascal"], 1, "Newton (N).", "Mechanics"),
+    M("p2", "Speed of light (m/s)", ["3×10⁶", "3×10⁸", "3×10¹⁰", "3×10⁵"], 1, "≈ 3×10⁸ m/s.", "Modern Physics"),
+    M("p3", "Acceleration due to gravity (m/s²)", ["9.8", "10.8", "8.9", "1.6"], 0, "≈ 9.8 m/s².", "Mechanics"),
+    M("p4", "Ohm's law: V =", ["IR", "I/R", "R/I", "I²R"], 0, "V = IR.", "Electricity"),
+    M("p5", "Wavelength × frequency =", ["Amplitude", "Period", "Speed", "Energy"], 2, "v = fλ.", "Waves"),
+    M("p6", "Lens that converges light", ["Concave", "Convex", "Plane", "Cylindrical"], 1, "Convex lens.", "Optics"),
+    M("p7", "Unit of electric charge", ["Volt", "Ampere", "Coulomb", "Ohm"], 2, "Coulomb (C).", "Electricity"),
+    M("p8", "Echo is caused by", ["Reflection", "Refraction", "Diffraction", "Absorption"], 0, "Reflection of sound.", "Waves"),
+    M("p9", "Work done = ", ["F × t", "F × d", "m × a", "P × V"], 1, "W = Fd.", "Mechanics"),
+    M("p10", "Half-life refers to", ["Decay time", "Bonding", "Fusion", "Mass"], 0, "Time for half a sample to decay.", "Modern Physics"),
+  ],
+  chemistry: [
+    M("c1", "Symbol of Sodium", ["So", "Sd", "Na", "S"], 2, "Na (Latin Natrium).", "Atomic Structure"),
+    M("c2", "pH of pure water", ["0", "7", "14", "1"], 1, "Neutral = 7.", "Acids/Bases"),
+    M("c3", "Most electronegative element", ["Oxygen", "Fluorine", "Chlorine", "Nitrogen"], 1, "Fluorine.", "Bonding"),
+    M("c4", "Number of electrons in neutral Carbon", ["4", "6", "12", "8"], 1, "Z = 6.", "Atomic Structure"),
+    M("c5", "Organic compound with single bonds only", ["Alkane", "Alkene", "Alkyne", "Aromatic"], 0, "Alkanes.", "Organic"),
+    M("c6", "Catalyst in Haber process", ["Pt", "Fe", "Ni", "V₂O₅"], 1, "Iron.", "Kinetics"),
+    M("c7", "Ion responsible for acidity", ["OH⁻", "H⁺", "Na⁺", "Cl⁻"], 1, "Hydrogen ion.", "Acids/Bases"),
+    M("c8", "Avogadro's number ≈", ["6.02×10²³", "3.14×10⁸", "9.8×10⁻¹", "1.6×10⁻¹⁹"], 0, "6.02×10²³.", "Atomic Structure"),
+    M("c9", "Bond in NaCl", ["Covalent", "Ionic", "Metallic", "Hydrogen"], 1, "Ionic.", "Bonding"),
+    M("c10", "Anode in electrolysis is", ["Negative", "Positive", "Neutral", "Cathode"], 1, "Positive electrode.", "Electrochem"),
+  ],
+  biology: [
+    M("b1", "Powerhouse of the cell", ["Nucleus", "Mitochondria", "Ribosome", "Golgi"], 1, "Mitochondria.", "Cells"),
+    M("b2", "DNA stands for", ["Deoxyribonucleic acid", "Dinitrogen acid", "Diribose acid", "Deoxynitric acid"], 0, "Deoxyribonucleic acid.", "Genetics"),
+    M("b3", "Process plants make food", ["Respiration", "Photosynthesis", "Transpiration", "Digestion"], 1, "Photosynthesis.", "Plants"),
+    M("b4", "Largest organ of human body", ["Liver", "Skin", "Brain", "Lungs"], 1, "Skin.", "Human Bio"),
+    M("b5", "Carrier of oxygen in blood", ["WBC", "Platelets", "Hemoglobin", "Plasma"], 2, "Hemoglobin in RBCs.", "Human Bio"),
+    M("b6", "Theory of natural selection by", ["Mendel", "Darwin", "Watson", "Pasteur"], 1, "Charles Darwin.", "Evolution"),
+    M("b7", "Unit of heredity", ["Cell", "Gene", "Tissue", "Organ"], 1, "Gene.", "Genetics"),
+    M("b8", "Producers in an ecosystem", ["Animals", "Plants", "Fungi", "Bacteria"], 1, "Plants.", "Ecology"),
+    M("b9", "Number of chambers in human heart", ["2", "3", "4", "5"], 2, "Four.", "Human Bio"),
+    M("b10", "Site of protein synthesis", ["Nucleus", "Ribosome", "Lysosome", "Vacuole"], 1, "Ribosome.", "Cells"),
+  ],
+  economics: [
+    M("ec1", "Law of demand: as price rises, quantity demanded", ["Rises", "Falls", "Stays", "Doubles"], 1, "Inverse relationship.", "Demand & Supply"),
+    M("ec2", "GDP stands for", ["Gross Domestic Product", "General Domestic Pay", "Gross Direct Profit", "Govt Domestic Plan"], 0, "GDP.", "National Income"),
+    M("ec3", "Central bank of Nigeria", ["UBA", "CBN", "NDIC", "NSE"], 1, "CBN.", "Money & Banking"),
+    M("ec4", "Opportunity cost is", ["Money paid", "Best alternative forgone", "Total cost", "Profit"], 1, "Next best alternative.", "Concepts"),
+    M("ec5", "Currency is a medium of", ["Exchange", "Storage", "Production", "Labour"], 0, "Medium of exchange.", "Money & Banking"),
+    M("ec6", "Inflation means", ["Price rise", "Price fall", "No change", "Tax cut"], 0, "General price rise.", "Concepts"),
+    M("ec7", "Trade between two countries =", ["Bilateral", "Multilateral", "Internal", "Barter"], 0, "Bilateral trade.", "Trade"),
+    M("ec8", "A factor of production NOT human", ["Labour", "Capital", "Entrepreneur", "Land"], 3, "Land.", "Concepts"),
+    M("ec9", "Demand curve typically slopes", ["Up", "Down", "Flat", "Vertical"], 1, "Downward.", "Demand & Supply"),
+    M("ec10", "A tax on imports", ["Tariff", "Subsidy", "Quota", "Grant"], 0, "Tariff.", "Trade"),
+  ],
+  government: [
+    M("g1", "Government of the people by the people", ["Monarchy", "Democracy", "Oligarchy", "Theocracy"], 1, "Democracy.", "Democracy"),
+    M("g2", "Nigeria became a republic in", ["1960", "1963", "1979", "1999"], 1, "1963.", "Constitution"),
+    M("g3", "ECOWAS HQ is in", ["Lagos", "Accra", "Abuja", "Dakar"], 2, "Abuja.", "Int'l Orgs"),
+    M("g4", "Three arms of government", ["Exec/Leg/Jud", "PM/Pres/King", "Fed/State/Local", "Civil/Mil/Pol"], 0, "Executive, Legislature, Judiciary.", "Concepts"),
+    M("g5", "Head of UN is called", ["President", "Sec-Gen", "PM", "Speaker"], 1, "Secretary-General.", "Int'l Orgs"),
+    M("g6", "Right to vote =", ["Suffrage", "Sovereignty", "Liberty", "Equality"], 0, "Suffrage.", "Concepts"),
+    M("g7", "Nigeria's constitution is", ["Unwritten", "Written", "Conventional", "Customary"], 1, "Written.", "Constitution"),
+    M("g8", "Federal capital of Nigeria", ["Lagos", "Kano", "Abuja", "Ibadan"], 2, "Abuja.", "Constitution"),
+    M("g9", "AU formerly known as", ["OAU", "UN", "ECOWAS", "EU"], 0, "Organization of African Unity.", "Int'l Orgs"),
+    M("g10", "A one-party state has", ["Many parties", "Two parties", "One party", "No party"], 2, "One party.", "Democracy"),
+  ],
+  literature: [
+    M("l1", "Author of 'Things Fall Apart'", ["Soyinka", "Achebe", "Okri", "Adichie"], 1, "Chinua Achebe.", "Prose"),
+    M("l2", "A 14-line poem is a", ["Ode", "Sonnet", "Haiku", "Limerick"], 1, "Sonnet.", "Poetry"),
+    M("l3", "Repetition of consonant sounds", ["Rhyme", "Alliteration", "Assonance", "Meter"], 1, "Alliteration.", "Devices"),
+    M("l4", "Wole Soyinka won the Nobel in", ["1986", "1990", "2000", "1976"], 0, "1986.", "African Drama"),
+    M("l5", "Main character in a story", ["Antagonist", "Protagonist", "Narrator", "Foil"], 1, "Protagonist.", "Prose"),
+    M("l6", "Comparing without 'like/as'", ["Simile", "Metaphor", "Irony", "Pun"], 1, "Metaphor.", "Devices"),
+    M("l7", "Setting refers to", ["Plot", "Theme", "Time/place", "Character"], 2, "Time and place.", "Prose"),
+    M("l8", "A long narrative poem", ["Lyric", "Epic", "Ballad", "Ode"], 1, "Epic.", "Poetry"),
+    M("l9", "Conversation between characters", ["Monologue", "Dialogue", "Soliloquy", "Aside"], 1, "Dialogue.", "African Drama"),
+    M("l10", "Theme means", ["Plot", "Central idea", "Character", "Setting"], 1, "Central idea/message.", "Prose"),
+  ],
+  ict: [
+    M("i1", "CPU stands for", ["Central Processing Unit", "Computer Power Unit", "Control Print Unit", "Central Print Util"], 0, "CPU.", "Hardware"),
+    M("i2", "RAM is", ["Permanent", "Volatile", "Optical", "Magnetic"], 1, "Volatile memory.", "Hardware"),
+    M("i3", "HTML is a", ["Programming lang", "Markup lang", "OS", "Database"], 1, "Markup language.", "Programming"),
+    M("i4", "1 byte = ", ["4 bits", "8 bits", "16 bits", "32 bits"], 1, "8 bits.", "Hardware"),
+    M("i5", "Device that connects networks", ["Router", "Printer", "Monitor", "Mouse"], 0, "Router.", "Networks"),
+    M("i6", "Software that manages hardware", ["App", "OS", "Driver", "Compiler"], 1, "Operating system.", "Software"),
+    M("i7", "SQL is used for", ["Graphics", "Databases", "Networking", "Gaming"], 1, "Databases.", "Database"),
+    M("i8", "URL stands for", ["Uniform Resource Locator", "Universal Run List", "User Resource Link", "Unified Read Loop"], 0, "URL.", "Networks"),
+    M("i9", "Primary key in DB is", ["Duplicate", "Unique ID", "Foreign", "Index"], 1, "Unique identifier.", "Database"),
+    M("i10", "Python is a", ["Snake", "Programming lang", "Browser", "OS"], 1, "Programming language.", "Programming"),
+  ],
+};
