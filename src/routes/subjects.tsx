@@ -24,7 +24,8 @@ function SubjectsPage() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SUBJECTS.map((s) => (
-            <div key={s.id} className="group relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-white/5 hover:border-white/20 transition-colors">
+            <Link key={s.id} to="/subjects/$subjectId" params={{ subjectId: s.id }}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-white/5 hover:border-white/20 hover:-translate-y-1 transition-all">
               <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-2xl" style={{ backgroundColor: s.hue }} />
               <div className="relative">
                 <div className="flex items-start justify-between">
@@ -37,12 +38,11 @@ function SubjectsPage() {
                     <span key={t} className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">{t}</span>
                   ))}
                 </div>
-                <Link to="/tutor"
-                  className="mt-5 inline-flex items-center gap-1 text-sm text-gold hover:underline">
-                  Ask Scholly <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
+                <span className="mt-5 inline-flex items-center gap-1 text-sm text-gold">
+                  Open subject <ArrowRight className="h-3.5 w-3.5" />
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
