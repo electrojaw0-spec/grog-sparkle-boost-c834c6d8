@@ -7,6 +7,7 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
+// @ts-expect-error - server handlers typing not yet exposed in this version
 export const Route = createFileRoute("/api/public/chat")({
   server: {
     handlers: {
