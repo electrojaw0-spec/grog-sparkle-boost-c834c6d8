@@ -103,7 +103,7 @@ function SubjectDetail() {
             </div>
           </div>
           <div className="relative mt-4 flex flex-wrap gap-1.5">
-            {subject.topics.map((t) => (
+            {subject.topics.map((t: string) => (
               <span key={t} className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-muted-foreground">{t}</span>
             ))}
           </div>
