@@ -7,7 +7,7 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-export const Route = createFileRoute("/api/chat")({
+export const Route = createFileRoute("/api/public/chat")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
