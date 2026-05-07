@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/chat")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         try {
           const body = (await request.json()) as { messages: ChatMsg[]; systemPrompt?: string };
           if (!Array.isArray(body?.messages)) {
