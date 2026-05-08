@@ -25,10 +25,7 @@ function HomePage() {
   return (
     <AppShell>
       {/* HERO — simple and clear */}
-      <section className="relative overflow-hidden">
-        <div className="absolute -top-32 -right-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute top-40 -left-20 h-80 w-80 rounded-full bg-gold/15 blur-3xl" />
-
+      <section className="relative">
         <div className="container mx-auto px-4 pt-16 pb-12 relative">
           <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs uppercase tracking-widest mb-6">
@@ -47,7 +44,7 @@ function HomePage() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link to="/subjects"
-                className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 text-base font-semibold hover:bg-white/10 transition-colors">
+                className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 text-base font-semibold hover:bg-secondary transition-colors">
                 <BookOpen className="h-4 w-4" /> Pick a subject
               </Link>
             </div>
@@ -64,7 +61,7 @@ function HomePage() {
         <div className="grid md:grid-cols-3 gap-4">
           {STEPS.map(({ n, icon: Icon, title, desc, to, cta }) => (
             <Link key={n} to={to}
-              className="group relative rounded-2xl bg-gradient-card p-6 border border-white/5 hover:border-gold/40 transition-all hover:-translate-y-1">
+              className="group relative rounded-2xl bg-gradient-card p-6 border border-border hover:border-gold/40 transition-all hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-10 w-10 rounded-xl bg-gradient-gold grid place-items-center font-display text-xl font-bold text-gold-foreground">
                   {n}
@@ -95,7 +92,7 @@ function HomePage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SUBJECTS.slice(0, 6).map((s) => (
             <Link key={s.id} to="/subjects/$subjectId" params={{ subjectId: s.id }}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-card p-5 border border-white/5 hover:border-white/20 hover:-translate-y-1 transition-all">
+              className="group relative overflow-hidden rounded-2xl bg-gradient-card p-5 border border-border hover:border-primary/30 hover:-translate-y-1 transition-all">
               <div
                 className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-25 blur-2xl"
                 style={{ backgroundColor: s.hue }}
@@ -118,7 +115,7 @@ function HomePage() {
 
       {/* WHY — quick bullets */}
       <section className="container mx-auto px-4 py-12">
-        <div className="rounded-3xl bg-gradient-card border border-white/5 p-8 md:p-12">
+        <div className="rounded-3xl bg-gradient-card border border-border p-8 md:p-12">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-8">Why students love it</h2>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             {[
@@ -138,7 +135,7 @@ function HomePage() {
 
       {/* CTA */}
       <section className="container mx-auto px-4 pb-20">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-hero p-10 md:p-14 text-center border border-white/10 glow">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-hero p-10 md:p-14 text-center border border-border glow">
           <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_30%,_oklch(0.83_0.16_85_/_0.3),_transparent_50%)]" />
           <div className="relative">
             <h3 className="font-display text-2xl md:text-4xl font-bold">Ready? Ask your first question.</h3>

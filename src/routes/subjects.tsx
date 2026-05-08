@@ -31,17 +31,17 @@ function SubjectsPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SUBJECTS.map((s) => (
             <Link key={s.id} to="/subjects/$subjectId" params={{ subjectId: s.id }}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-white/5 hover:border-white/20 hover:-translate-y-1 transition-all">
+              className="group relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-border hover:border-primary/30 hover:-translate-y-1 transition-all">
               <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-2xl" style={{ backgroundColor: s.hue }} />
               <div className="relative">
                 <div className="flex items-start justify-between">
                   <div className="text-4xl">{s.emoji}</div>
-                  <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted-foreground">{s.questionCount} Q</span>
+                  <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted-foreground">{s.questionCount} Q</span>
                 </div>
                 <h3 className="mt-4 font-display text-xl font-semibold">{s.name}</h3>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {s.topics.map((t) => (
-                    <span key={t} className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">{t}</span>
+                    <span key={t} className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">{t}</span>
                   ))}
                 </div>
                 <span className="mt-5 inline-flex items-center gap-1 text-sm text-gold">

@@ -93,7 +93,7 @@ function SubjectDetail() {
           <ArrowLeft className="h-4 w-4" /> All subjects
         </Link>
 
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-white/5 mb-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-card p-6 border border-border mb-6">
           <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full opacity-30 blur-2xl" style={{ backgroundColor: subject.hue }} />
           <div className="relative flex items-center gap-4">
             <div className="text-5xl">{subject.emoji}</div>
@@ -104,7 +104,7 @@ function SubjectDetail() {
           </div>
           <div className="relative mt-4 flex flex-wrap gap-1.5">
             {subject.topics.map((t: string) => (
-              <span key={t} className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-muted-foreground">{t}</span>
+              <span key={t} className="rounded-full bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground">{t}</span>
             ))}
           </div>
         </div>
@@ -112,13 +112,13 @@ function SubjectDetail() {
         {mode === "overview" && (
           <div className="grid sm:grid-cols-2 gap-4">
             <button onClick={() => startSession("practice")}
-              className="group rounded-2xl bg-gradient-card border border-white/5 hover:border-white/20 p-6 text-left transition-colors">
+              className="group rounded-2xl bg-gradient-card border border-border hover:border-primary/30 p-6 text-left transition-colors">
               <Sparkles className="h-7 w-7 text-gold mb-3" />
               <h3 className="font-display text-xl font-semibold">Practice Mode</h3>
               <p className="text-sm text-muted-foreground mt-1">Untimed. See explanations after each answer.</p>
             </button>
             <button onClick={() => startSession("exam")} disabled={bank.length === 0}
-              className="group rounded-2xl bg-gradient-card border border-white/5 hover:border-white/20 p-6 text-left transition-colors disabled:opacity-50">
+              className="group rounded-2xl bg-gradient-card border border-border hover:border-primary/30 p-6 text-left transition-colors disabled:opacity-50">
               <Timer className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-display text-xl font-semibold">Mock Exam</h3>
               <p className="text-sm text-muted-foreground mt-1">10 questions, 1 min each. Score at the end.</p>
@@ -132,7 +132,7 @@ function SubjectDetail() {
         )}
 
         {(mode === "practice" || mode === "exam") && questions[idx] && (
-          <div className="rounded-2xl bg-gradient-card border border-white/5 p-6">
+          <div className="rounded-2xl bg-gradient-card border border-border p-6">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
               <span>Question {idx + 1} of {questions.length}</span>
               {mode === "exam" && (
@@ -142,7 +142,7 @@ function SubjectDetail() {
                 </span>
               )}
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-6">
+            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden mb-6">
               <div className="h-full bg-gradient-gold transition-all" style={{ width: `${((idx + 1) / questions.length) * 100}%` }} />
             </div>
             <h2 className="font-display text-lg md:text-xl font-semibold mb-5">{questions[idx].q}</h2>
@@ -150,18 +150,18 @@ function SubjectDetail() {
               {questions[idx].options.map((opt, i) => {
                 const correct = i === questions[idx].answer;
                 const chosen = picked === i;
-                let cls = "border-white/10 hover:border-white/30 hover:bg-white/5";
+                let cls = "border-border hover:border-primary/40 hover:bg-secondary";
                 if (revealed) {
                   if (correct) cls = "border-emerald-500/60 bg-emerald-500/10";
                   else if (chosen) cls = "border-red-500/60 bg-red-500/10";
-                  else cls = "border-white/5 opacity-60";
+                  else cls = "border-border opacity-60";
                 } else if (chosen) {
                   cls = "border-primary bg-primary/10";
                 }
                 return (
                   <button key={i} disabled={revealed} onClick={() => setPicked(i)}
                     className={`w-full text-left rounded-xl border p-3.5 text-sm transition-colors flex items-center gap-3 ${cls}`}>
-                    <span className="h-7 w-7 rounded-lg bg-white/5 grid place-items-center text-xs font-semibold shrink-0">
+                    <span className="h-7 w-7 rounded-lg bg-secondary grid place-items-center text-xs font-semibold shrink-0">
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1">{opt}</span>
@@ -172,7 +172,7 @@ function SubjectDetail() {
               })}
             </div>
             {revealed && (
-              <div className="mt-4 rounded-xl bg-white/5 p-4 text-sm">
+              <div className="mt-4 rounded-xl bg-secondary p-4 text-sm">
                 <div className="font-semibold text-gold mb-1">Explanation</div>
                 <p className="text-muted-foreground">{questions[idx].explain}</p>
               </div>
@@ -194,7 +194,7 @@ function SubjectDetail() {
         )}
 
         {mode === "result" && (
-          <div className="rounded-2xl bg-gradient-card border border-white/5 p-8 text-center">
+          <div className="rounded-2xl bg-gradient-card border border-border p-8 text-center">
             <Trophy className="h-12 w-12 text-gold mx-auto mb-3" />
             <h2 className="font-display text-3xl font-bold">
               You scored <span className="text-gradient-gold">{score}/{questions.length}</span>
@@ -204,7 +204,7 @@ function SubjectDetail() {
             </p>
             <div className="mt-6 flex justify-center gap-3 flex-wrap">
               <button onClick={() => startSession(mode === "result" ? "practice" : "practice")}
-                className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm font-semibold hover:bg-white/10">
+                className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm font-semibold hover:bg-secondary">
                 <RotateCcw className="h-4 w-4" /> Try again
               </button>
               <button onClick={() => setMode("overview")}
@@ -216,7 +216,7 @@ function SubjectDetail() {
               {questions.map((q, i) => {
                 const ok = answers[i] === q.answer;
                 return (
-                  <div key={q.id} className="rounded-xl bg-white/5 p-4">
+                  <div key={q.id} className="rounded-xl bg-secondary p-4">
                     <div className="flex items-start gap-2 text-sm">
                       {ok ? <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" /> : <XCircle className="h-5 w-5 text-red-400 shrink-0" />}
                       <div>

@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               return (
                 <Link key={to} to={to}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                    active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}>
                   <Icon className="h-4 w-4" /> {label}
                 </Link>

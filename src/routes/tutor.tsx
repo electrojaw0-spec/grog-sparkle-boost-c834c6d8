@@ -100,7 +100,7 @@ function TutorPage() {
                 <div className="mt-6 grid sm:grid-cols-2 gap-2 w-full max-w-xl">
                   {SUGGESTIONS.map((s) => (
                     <button key={s} onClick={() => send(s)}
-                      className="text-left text-sm rounded-xl bg-white/5 hover:bg-white/10 transition-colors p-3 border border-white/5">
+                      className="text-left text-sm rounded-xl bg-secondary hover:bg-secondary transition-colors p-3 border border-border">
                       {s}
                     </button>
                   ))}
@@ -120,7 +120,7 @@ function TutorPage() {
                 <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
                   m.role === "user"
                     ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
-                    : "bg-card border border-white/5 rounded-tl-sm"
+                    : "bg-card border border-border rounded-tl-sm"
                 }`}>
                   {m.content || (streaming && i === messages.length - 1
                     ? <span className="inline-flex gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" /><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.15s" }} /><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.3s" }} /></span>
@@ -138,7 +138,7 @@ function TutorPage() {
 
           <form
             onSubmit={(e) => { e.preventDefault(); send(); }}
-            className="border-t border-white/5 p-3 md:p-4 flex items-end gap-2"
+            className="border-t border-border p-3 md:p-4 flex items-end gap-2"
           >
             <textarea
               value={input}
@@ -148,7 +148,7 @@ function TutorPage() {
               }}
               placeholder="Ask about any WAEC topic…"
               rows={1}
-              className="flex-1 resize-none bg-white/5 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
+              className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
             />
             <button
               type="submit"
