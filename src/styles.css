@@ -145,12 +145,12 @@
     color: transparent;
   }
   .glass {
-    background: color-mix(in oklab, var(--card) 60%, transparent);
-    backdrop-filter: blur(16px) saturate(140%);
-    border: 1px solid color-mix(in oklab, white 8%, transparent);
+    background: color-mix(in oklab, var(--card) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
   }
-  .glow { box-shadow: var(--shadow-glow); }
-  .glow-gold { box-shadow: var(--shadow-gold); }
+  .glow { box-shadow: 0 6px 20px -8px color-mix(in oklab, var(--primary) 35%, transparent); }
+  .glow-gold { box-shadow: 0 6px 20px -8px color-mix(in oklab, var(--gold) 45%, transparent); }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
