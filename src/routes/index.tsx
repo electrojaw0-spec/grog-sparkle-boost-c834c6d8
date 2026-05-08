@@ -25,10 +25,7 @@ function HomePage() {
   return (
     <AppShell>
       {/* HERO — simple and clear */}
-      <section className="relative overflow-hidden">
-        <div className="absolute -top-32 -right-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute top-40 -left-20 h-80 w-80 rounded-full bg-gold/15 blur-3xl" />
-
+      <section className="relative">
         <div className="container mx-auto px-4 pt-16 pb-12 relative">
           <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs uppercase tracking-widest mb-6">
