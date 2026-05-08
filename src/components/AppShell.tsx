@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Sparkles, Home, MessageSquare, BookOpen, Trophy } from "lucide-react";
+import schollyLogo from "@/assets/scholly-logo.png";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -14,13 +15,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-40 glass">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center glow">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-              <span className="absolute inset-0 rounded-xl animate-pulse-ring" />
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <img
+              src={schollyLogo}
+              alt="Scholly AI logo"
+              className="h-10 w-10 rounded-xl object-contain bg-white"
+            />
             <div className="leading-tight">
-              <div className="font-display text-lg font-bold">Scholly<span className="text-gradient-gold">.AI</span></div>
+              <div className="font-display text-lg font-bold">Scholly<span className="text-gradient-gold">AI</span></div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">WAEC companion</div>
             </div>
           </Link>
