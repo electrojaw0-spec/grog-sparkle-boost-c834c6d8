@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
 import { Link } from "@tanstack/react-router";
@@ -15,6 +15,12 @@ export const Route = createFileRoute("/subjects")({
 });
 
 function SubjectsPage() {
+  const location = useLocation();
+
+  if (location.pathname !== "/subjects") {
+    return <Outlet />;
+  }
+
   return (
     <AppShell>
       <div className="container mx-auto px-4 py-10">
