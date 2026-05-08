@@ -46,7 +46,7 @@ function LeaderboardPage() {
                 <div className="text-4xl mb-2 animate-float" style={{ animationDelay: `${i * 0.4}s` }}>{u.avatar}</div>
                 <div className="font-semibold text-sm">{u.name}</div>
                 <div className="text-xs text-muted-foreground">{u.xp.toLocaleString()} XP</div>
-                <div className={`mt-3 w-full ${heights[i]} rounded-t-2xl ${ranks[i] === 1 ? "bg-gradient-gold glow-gold" : "bg-gradient-card border border-white/10"} grid place-items-center`}>
+                <div className={`mt-3 w-full ${heights[i]} rounded-t-2xl ${ranks[i] === 1 ? "bg-gradient-gold glow-gold" : "bg-gradient-card border border-border"} grid place-items-center`}>
                   <div className="flex flex-col items-center gap-1">
                     {icons[i]}
                     <span className={`font-display text-2xl font-bold ${ranks[i] === 1 ? "text-gold-foreground" : ""}`}>{ranks[i]}</span>
