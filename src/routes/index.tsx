@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 export const Route = createFileRoute("/")({
@@ -40,6 +40,14 @@ const ACTIONS = [
     desc: "Sit a timed mock and see the grade you would get today.",
     to: "/subjects",
     cta: "Start a mock",
+  },
+  {
+    n: 4,
+    icon: Swords,
+    title: "Challenge a friend",
+    desc: "Versus mode — go head-to-head with a classmate and see who scores highest.",
+    to: "/versus",
+    cta: "Start a battle",
   },
 ] as const;
 
@@ -94,7 +102,7 @@ function HomePage() {
           <h2 className="font-display text-3xl md:text-4xl font-bold">Three simple ways to study</h2>
           <p className="text-sm text-muted-foreground mt-3">Pick whichever helps you most today.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {ACTIONS.map(({ n, icon: Icon, title, desc, to, cta }) => (
             <Link
               key={n}
