@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
 import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2 } from "lucide-react";
+import heroBg from "@/assets/hero-bg.png";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -25,7 +26,11 @@ function HomePage() {
   return (
     <AppShell>
       {/* HERO — simple and clear */}
-      <section className="relative">
+      <section
+        className="relative bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
+        <div className="absolute inset-0 bg-background/60" />
         <div className="container mx-auto px-4 pt-16 pb-12 relative">
           <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs uppercase tracking-widest mb-6">
