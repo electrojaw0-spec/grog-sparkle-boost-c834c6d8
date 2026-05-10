@@ -1,12 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Sparkles, Home, MessageSquare, BookOpen, Trophy } from "lucide-react";
+import { Sparkles, Home, MessageSquare, BookOpen, Swords } from "lucide-react";
 import schollyLogo from "@/assets/scholly-logo.png";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/tutor", label: "AI Tutor", icon: MessageSquare },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
-  { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { to: "/versus", label: "Versus", icon: Swords },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {

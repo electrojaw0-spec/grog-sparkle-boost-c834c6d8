@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VersusRouteImport } from './routes/versus'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -16,6 +17,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
+const VersusRoute = VersusRouteImport.update({
+  id: '/versus',
+  path: '/versus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
   path: '/tutor',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/versus': typeof VersusRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/versus': typeof VersusRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
+  '/versus': typeof VersusRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
+    | '/versus'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
+    | '/versus'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
+    | '/versus'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesById: FileRoutesById
@@ -104,11 +116,19 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
+  VersusRoute: typeof VersusRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/versus': {
+      id: '/versus'
+      path: '/versus'
+      fullPath: '/versus'
+      preLoaderRoute: typeof VersusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tutor': {
       id: '/tutor'
       path: '/tutor'
@@ -171,6 +191,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
+  VersusRoute: VersusRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
 }
 export const routeTree = rootRouteImport

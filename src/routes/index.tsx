@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 export const Route = createFileRoute("/")({
@@ -40,6 +40,14 @@ const ACTIONS = [
     desc: "Sit a timed mock and see the grade you would get today.",
     to: "/subjects",
     cta: "Start a mock",
+  },
+  {
+    n: 4,
+    icon: Swords,
+    title: "Challenge a friend",
+    desc: "Versus mode — go head-to-head with a classmate and see who scores highest.",
+    to: "/versus",
+    cta: "Start a battle",
   },
 ] as const;
 
