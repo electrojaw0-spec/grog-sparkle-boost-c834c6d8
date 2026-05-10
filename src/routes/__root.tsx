@@ -32,11 +32,15 @@ export const Route = createRootRoute({
       { title: "Scholly.AI — Your AI WAEC Study Companion" },
       { name: "description", content: "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE." },
       { name: "author", content: "Scholly.AI" },
-      { property: "og:title", content: "Scholly.AI — AI WAEC Companion" },
-      { property: "og:description", content: "Pass WAEC with confidence using an adaptive AI tutor." },
+      { property: "og:title", content: "Scholly.AI — Your AI WAEC Study Companion" },
+      { property: "og:description", content: "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Scholly.AI — Your AI WAEC Study Companion" },
+      { name: "twitter:description", content: "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/13db86f0-34d3-4e7e-b3e8-e84e7954bd99/id-preview-b433b911--eda03b14-692d-4010-93ae-d88c73703dae.lovable.app-1778376184904.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/13db86f0-34d3-4e7e-b3e8-e84e7954bd99/id-preview-b433b911--eda03b14-692d-4010-93ae-d88c73703dae.lovable.app-1778376184904.png" },
     ],
     links: [
       {
