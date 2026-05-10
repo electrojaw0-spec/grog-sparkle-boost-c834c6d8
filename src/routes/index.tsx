@@ -102,7 +102,7 @@ function HomePage() {
           <h2 className="font-display text-3xl md:text-4xl font-bold">Three simple ways to study</h2>
           <p className="text-sm text-muted-foreground mt-3">Pick whichever helps you most today.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {ACTIONS.map(({ n, icon: Icon, title, desc, to, cta }) => (
             <Link
               key={n}
