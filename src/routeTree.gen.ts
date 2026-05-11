@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VersusOnlineRouteImport } from './routes/versus-online'
 import { Route as VersusRouteImport } from './routes/versus'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
+const VersusOnlineRoute = VersusOnlineRouteImport.update({
+  id: '/versus-online',
+  path: '/versus-online',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VersusRoute = VersusRouteImport.update({
   id: '/versus',
   path: '/versus',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
+  '/versus-online': typeof VersusOnlineRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
+  '/versus-online': typeof VersusOnlineRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
+  '/versus-online': typeof VersusOnlineRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/subjects'
     | '/tutor'
     | '/versus'
+    | '/versus-online'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/subjects'
     | '/tutor'
     | '/versus'
+    | '/versus-online'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/subjects'
     | '/tutor'
     | '/versus'
+    | '/versus-online'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesById: FileRoutesById
@@ -117,11 +129,19 @@ export interface RootRouteChildren {
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
   VersusRoute: typeof VersusRoute
+  VersusOnlineRoute: typeof VersusOnlineRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/versus-online': {
+      id: '/versus-online'
+      path: '/versus-online'
+      fullPath: '/versus-online'
+      preLoaderRoute: typeof VersusOnlineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/versus': {
       id: '/versus'
       path: '/versus'
@@ -192,17 +212,9 @@ const rootRouteChildren: RootRouteChildren = {
   SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
   VersusRoute: VersusRoute,
+  VersusOnlineRoute: VersusOnlineRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

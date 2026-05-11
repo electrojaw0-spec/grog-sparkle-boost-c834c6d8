@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 export const Route = createFileRoute("/")({
@@ -45,9 +45,17 @@ const ACTIONS = [
     n: 4,
     icon: Swords,
     title: "Challenge a friend",
-    desc: "Versus mode — go head-to-head with a classmate and see who scores highest.",
+    desc: "Versus mode — go head-to-head on the same phone and see who scores highest.",
     to: "/versus",
-    cta: "Start a battle",
+    cta: "Same-phone duel",
+  },
+  {
+    n: 5,
+    icon: Wifi,
+    title: "Battle online",
+    desc: "Create a room, share the 6-letter code, and play live with a friend on another phone.",
+    to: "/versus-online",
+    cta: "Play online",
   },
 ] as const;
 
