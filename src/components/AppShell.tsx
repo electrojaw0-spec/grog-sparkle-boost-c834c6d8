@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">{children}</main>
 
       <nav className="md:hidden sticky bottom-0 z-40 glass border-t">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = pathname === to || (to !== "/" && pathname.startsWith(to));
             return (
