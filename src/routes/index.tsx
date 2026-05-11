@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 export const Route = createFileRoute("/")({
