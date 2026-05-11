@@ -8,7 +8,6 @@ const CORS = {
 };
 
 export const Route = createFileRoute("/api/public/chat")({
-  // @ts-expect-error - server handlers typing not yet exposed in this version
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
