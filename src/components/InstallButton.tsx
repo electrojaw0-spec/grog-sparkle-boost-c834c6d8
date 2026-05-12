@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
+import { Download, Share, X, ExternalLink } from "lucide-react";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -7,6 +7,7 @@ type BIPEvent = Event & {
 };
 
 const DISMISS_KEY = "scholly-install-dismissed";
+const PUBLISHED_URL = "https://grog-sparkle-boost.lovable.app";
 
 export function InstallButton({ className = "" }: { className?: string }) {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
