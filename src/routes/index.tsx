@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
+import { InstallButton } from "@/components/InstallButton";
 import { SUBJECTS } from "@/lib/subjects";
 import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
@@ -95,6 +96,7 @@ function HomePage() {
               >
                 <BookOpen className="h-4 w-4" /> Browse subjects
               </Link>
+              <InstallButton />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
               No sign-up needed · 100% free · Works on slow internet
