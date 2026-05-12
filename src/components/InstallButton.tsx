@@ -31,9 +31,6 @@ export function InstallButton({ className = "" }: { className?: string }) {
     const onBIP = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BIPEvent);
-      if (!standalone && !dismissed) {
-        setTimeout(() => setAutoPopup(true), 1500);
-      }
     };
     const onInstalled = () => {
       setInstalled(true);
@@ -43,12 +40,14 @@ export function InstallButton({ className = "" }: { className?: string }) {
     window.addEventListener("beforeinstallprompt", onBIP);
     window.addEventListener("appinstalled", onInstalled);
 
-    // iOS has no beforeinstallprompt — pop up the manual instructions
-    if (ios && !standalone && !dismissed) {
-      setTimeout(() => {
-        setAutoPopup(true);
-        setShowIos(true);
-      }, 1500);
+    // Always pop up shortly after load (unless installed or dismissed)
+    if (!standalone && !dismissed) {
+      const t = setTimeout(() => setAutoPopup(true), 1200);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener("beforeinstallprompt", onBIP);
+        window.removeEventListener("appinstalled", onInstalled);
+      };
     }
 
     return () => {
