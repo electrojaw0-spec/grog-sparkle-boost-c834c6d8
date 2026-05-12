@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
+import { Download, Share, X, ExternalLink } from "lucide-react";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -7,6 +7,7 @@ type BIPEvent = Event & {
 };
 
 const DISMISS_KEY = "scholly-install-dismissed";
+const PUBLISHED_URL = "https://grog-sparkle-boost.lovable.app";
 
 export function InstallButton({ className = "" }: { className?: string }) {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
@@ -110,46 +111,78 @@ export function InstallButton({ className = "" }: { className?: string }) {
               </div>
             </div>
 
-            {isIos || !deferred ? (
-              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside mt-2">
-                {isIos ? (
+            {(() => {
+              const inIframe = (() => {
+                try { return window.self !== window.top; } catch { return true; }
+              })();
+              if (inIframe) {
+                return (
                   <>
-                    <li>
-                      Tap the <Share className="inline h-4 w-4 text-gold" /> Share button in Safari.
-                    </li>
-                    <li>Choose <strong>Add to Home Screen</strong>.</li>
-                    <li>Tap <strong>Add</strong> — Scholly opens like a real app.</li>
+                    <p className="text-sm text-muted-foreground">
+                      You're viewing Scholly inside the editor preview, where browsers block app
+                      installation. Open the live site to install it on your phone.
+                    </p>
+                    <div className="mt-5 flex gap-2">
+                      <a
+                        href={PUBLISHED_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-gold-foreground glow-gold"
+                      >
+                        <ExternalLink className="h-4 w-4" /> Open live app
+                      </a>
+                      <button
+                        onClick={dismiss}
+                        className="flex-1 inline-flex items-center justify-center rounded-full glass px-5 py-2.5 text-sm font-semibold hover:bg-secondary"
+                      >
+                        Not now
+                      </button>
+                    </div>
                   </>
-                ) : (
-                  <>
-                    <li>Open the browser menu (⋮).</li>
-                    <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
-                    <li>Confirm to finish.</li>
-                  </>
-                )}
-              </ol>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Tap install below to add Scholly to your home screen — no app store, no sign-up.
-              </p>
-            )}
-
-            <div className="mt-5 flex gap-2">
-              {deferred && !isIos && (
-                <button
-                  onClick={triggerInstall}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-gold-foreground glow-gold"
-                >
-                  <Download className="h-4 w-4" /> Install
-                </button>
-              )}
-              <button
-                onClick={dismiss}
-                className="flex-1 inline-flex items-center justify-center rounded-full glass px-5 py-2.5 text-sm font-semibold hover:bg-secondary"
-              >
-                Not now
-              </button>
-            </div>
+                );
+              }
+              return (
+                <>
+                  {isIos || !deferred ? (
+                    <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside mt-2">
+                      {isIos ? (
+                        <>
+                          <li>Tap the <Share className="inline h-4 w-4 text-gold" /> Share button in Safari.</li>
+                          <li>Choose <strong>Add to Home Screen</strong>.</li>
+                          <li>Tap <strong>Add</strong> — Scholly opens like a real app.</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>Open the browser menu (⋮).</li>
+                          <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+                          <li>Confirm to finish.</li>
+                        </>
+                      )}
+                    </ol>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Tap install below to add Scholly to your home screen — no app store, no sign-up.
+                    </p>
+                  )}
+                  <div className="mt-5 flex gap-2">
+                    {deferred && !isIos && (
+                      <button
+                        onClick={triggerInstall}
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-gold-foreground glow-gold"
+                      >
+                        <Download className="h-4 w-4" /> Install
+                      </button>
+                    )}
+                    <button
+                      onClick={dismiss}
+                      className="flex-1 inline-flex items-center justify-center rounded-full glass px-5 py-2.5 text-sm font-semibold hover:bg-secondary"
+                    >
+                      Not now
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
