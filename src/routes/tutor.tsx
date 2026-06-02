@@ -24,6 +24,7 @@ const SUGGESTIONS = [
 ];
 
 function TutorPage() {
+  const access = useTutorAccess();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
