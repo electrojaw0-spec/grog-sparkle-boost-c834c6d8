@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useRef, useState } from "react";
 import { Send, Sparkles, Bot, User, Loader2 } from "lucide-react";
+import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
@@ -23,6 +24,7 @@ const SUGGESTIONS = [
 ];
 
 function TutorPage() {
+  const access = useTutorAccess();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -76,6 +78,9 @@ function TutorPage() {
 
   return (
     <AppShell>
+      {!access.hasAccess ? (
+        <TutorPaywall onUnlock={(until) => access.grant(until - Date.now())} />
+      ) : (
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
@@ -160,6 +165,7 @@ function TutorPage() {
           </form>
         </div>
       </div>
+      )}
     </AppShell>
   );
 }
