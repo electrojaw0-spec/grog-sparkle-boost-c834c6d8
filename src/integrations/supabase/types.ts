@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan: string
+          redeemed_at: string | null
+          used: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan: string
+          redeemed_at?: string | null
+          used?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: string
+          redeemed_at?: string | null
+          used?: boolean
+        }
+        Relationships: []
+      }
       versus_rooms: {
         Row: {
           code: string
