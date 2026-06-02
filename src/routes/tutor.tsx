@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useRef, useState } from "react";
 import { Send, Sparkles, Bot, User, Loader2 } from "lucide-react";
+import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
