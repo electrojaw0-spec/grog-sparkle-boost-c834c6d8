@@ -165,6 +165,7 @@ function TutorPage() {
           </form>
         </div>
       </div>
+      )}
     </AppShell>
   );
 }
