@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { InstallButton } from "@/components/InstallButton";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, ExternalLink } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
+
+const WAVE_PAY_LINK = "https://pay.wave.com/m/YOUR_MERCHANT_LINK"; // TODO: replace with your Wave pay link
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -190,6 +192,33 @@ function HomePage() {
                 <span className="text-sm">{p}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SUPPORT — Wave payment */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="relative overflow-hidden rounded-3xl border border-border p-8 md:p-10 text-center bg-[#0055FF]/10">
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#0055FF]/20 px-4 py-1.5 text-xs font-medium mb-4 text-[#0055FF]">
+              <Heart className="h-3.5 w-3.5" />
+              Support the project
+            </div>
+            <h3 className="font-display text-xl md:text-2xl font-bold">Keep Scholly free for every student</h3>
+            <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
+              Scholly runs on donations. If it helped you study, a small contribution keeps it running for others.
+            </p>
+            <a
+              href={WAVE_PAY_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#0055FF] px-7 py-3 text-base font-semibold text-white hover:bg-[#0044CC] transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" /> Pay with Wave
+            </a>
+            <p className="mt-3 text-xs text-muted-foreground">
+              100% voluntary · Tap the button, enter any amount
+            </p>
           </div>
         </div>
       </section>
