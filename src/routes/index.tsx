@@ -208,14 +208,11 @@ function HomePage() {
             <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
               Scholly runs on donations. If it helped you study, a small contribution keeps it running for others.
             </p>
-            <a
-              href={WAVE_PAY_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#0055FF] px-7 py-3 text-base font-semibold text-white hover:bg-[#0044CC] transition-colors"
-            >
-              <ExternalLink className="h-4 w-4" /> Pay with Wave
-            </a>
+            <div className="mt-5 inline-flex flex-col items-center gap-2 rounded-2xl bg-[#0055FF]/10 border border-[#0055FF]/30 px-6 py-4 text-sm">
+              <p className="font-medium text-[#0055FF]">Send on Wave to</p>
+              <p className="font-display text-2xl font-bold text-white">+220 369 2876</p>
+              <p className="text-xs text-muted-foreground">Enter any amount, then message us on WhatsApp</p>
+            </div>
             <a
               href="https://wa.me/2203692876?text=Hi%20Scholly%20team"
               target="_blank"

@@ -86,14 +86,11 @@ export function TutorPaywall({ onUnlock }: { onUnlock: (until: number) => void }
           </div>
         </div>
 
-        <a
-          href={WAVE_PAY_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-flex items-center justify-center gap-2 w-full h-12 rounded-2xl bg-[#0055FF] hover:bg-[#0044CC] text-white font-semibold transition-colors"
-        >
-          <ExternalLink className="h-4 w-4" /> Pay with Wave
-        </a>
+        <div className="mt-5 inline-flex flex-col items-center gap-2 w-full rounded-2xl bg-[#0055FF]/10 border border-[#0055FF]/30 px-6 py-4 text-sm">
+          <p className="font-medium text-[#0055FF]">Send on Wave to</p>
+          <p className="font-display text-2xl font-bold text-white">+220 369 2876</p>
+          <p className="text-xs text-muted-foreground">Include your name, then message us on WhatsApp</p>
+        </div>
         <p className="text-[11px] text-muted-foreground mt-2">
           After paying, send your payment screenshot on
           <a
