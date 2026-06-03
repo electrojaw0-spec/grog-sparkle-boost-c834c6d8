@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, ExternalLink, Loader2, Check, Lock, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const WAVE_PAY_LINK = "https://pay.wave.com/m/2203692876"; // Your Wave number
+
 const STORAGE_KEY = "scholly_tutor_access_until";
 
 export function useTutorAccess() {
