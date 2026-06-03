@@ -216,6 +216,14 @@ function HomePage() {
             >
               <ExternalLink className="h-4 w-4" /> Pay with Wave
             </a>
+            <a
+              href="https://wa.me/2203692876?text=Hi%20Scholly%20team"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Or reach us on WhatsApp
+            </a>
             <p className="mt-3 text-xs text-muted-foreground">
               100% voluntary · Tap the button, enter any amount
             </p>
