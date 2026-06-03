@@ -5,7 +5,7 @@ import { SUBJECTS } from "@/lib/subjects";
 import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, ExternalLink } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
-const WAVE_PAY_LINK = "https://pay.wave.com/m/YOUR_MERCHANT_LINK"; // TODO: replace with your Wave pay link
+const WAVE_PAY_LINK = "https://pay.wave.com/m/2203692876"; // Your Wave number
 
 export const Route = createFileRoute("/")({
   component: HomePage,
