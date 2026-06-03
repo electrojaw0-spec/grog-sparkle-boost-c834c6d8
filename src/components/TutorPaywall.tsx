@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, ExternalLink, Loader2, Check, Lock, MessageCircle } from "lucide-react";
+import { Sparkles, Loader2, Check, Lock, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 
