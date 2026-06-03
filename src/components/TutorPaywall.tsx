@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Sparkles, ExternalLink, Loader2, Check, Lock } from "lucide-react";
+import { Sparkles, ExternalLink, Loader2, Check, Lock, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const WAVE_PAY_LINK = "https://pay.wave.com/m/YOUR_MERCHANT_LINK"; // TODO: replace
+const WAVE_PAY_LINK = "https://pay.wave.com/m/2203692876"; // Your Wave number
 const STORAGE_KEY = "scholly_tutor_access_until";
 
 export function useTutorAccess() {
@@ -95,7 +95,16 @@ export function TutorPaywall({ onUnlock }: { onUnlock: (until: number) => void }
           <ExternalLink className="h-4 w-4" /> Pay with Wave
         </a>
         <p className="text-[11px] text-muted-foreground mt-2">
-          After paying, send your payment screenshot on WhatsApp to get your code.
+          After paying, send your payment screenshot on
+          <a
+            href="https://wa.me/2203692876?text=Hi%2C%20I%20just%20paid%20for%20Scholly%20AI%20Tutor%20access"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-0.5 text-[#25D366] hover:underline font-medium ml-0.5"
+          >
+            <MessageCircle className="h-3 w-3" /> WhatsApp
+          </a>
+          {" "}to get your code.
         </p>
 
         <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">

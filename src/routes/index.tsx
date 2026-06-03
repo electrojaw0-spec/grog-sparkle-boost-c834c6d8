@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { InstallButton } from "@/components/InstallButton";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, ExternalLink } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, ExternalLink, MessageCircle } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
-const WAVE_PAY_LINK = "https://pay.wave.com/m/YOUR_MERCHANT_LINK"; // TODO: replace with your Wave pay link
+const WAVE_PAY_LINK = "https://pay.wave.com/m/2203692876"; // Your Wave number
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -215,6 +215,14 @@ function HomePage() {
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#0055FF] px-7 py-3 text-base font-semibold text-white hover:bg-[#0044CC] transition-colors"
             >
               <ExternalLink className="h-4 w-4" /> Pay with Wave
+            </a>
+            <a
+              href="https://wa.me/2203692876?text=Hi%20Scholly%20team"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Or reach us on WhatsApp
             </a>
             <p className="mt-3 text-xs text-muted-foreground">
               100% voluntary · Tap the button, enter any amount
