@@ -39,7 +39,7 @@ function VersusPage() {
   const [round, setRound] = useState(0); // 0..ROUNDS-1
   const [turn, setTurn] = useState<0 | 1>(0); // 0 = p1, 1 = p2
   const [scores, setScores] = useState<[number, number]>([0, 0]);
-  const [picked, setPicked] = useState<number | null>(null);
+  const [picks, setPicks] = useState<[number | null, number | null]>([null, null]);
 
   const subject = useMemo(() => SUBJECTS.find((s) => s.id === subjectId)!, [subjectId]);
   const names: [string, string] = [p1.trim() || "Player 1", p2.trim() || "Player 2"];
@@ -52,36 +52,39 @@ function VersusPage() {
     setRound(0);
     setTurn(0);
     setScores([0, 0]);
-    setPicked(null);
+    setPicks([null, null]);
     setPhase("ready");
   };
 
   const answer = (i: number) => {
     if (phase !== "answer" || !current) return;
-    setPicked(i);
-    const correct = i === current.answer;
-    if (correct) {
-      const next: [number, number] = [...scores] as [number, number];
-      next[turn] += 1;
-      setScores(next);
+    const nextPicks: [number | null, number | null] = [...picks] as [number | null, number | null];
+    nextPicks[turn] = i;
+    setPicks(nextPicks);
+
+    // If both players have answered, reveal
+    if (nextPicks[0] !== null && nextPicks[1] !== null) {
+      const nextScores: [number, number] = [...scores] as [number, number];
+      if (nextPicks[0] === current.answer) nextScores[0] += 1;
+      if (nextPicks[1] === current.answer) nextScores[1] += 1;
+      setScores(nextScores);
+      setPhase("reveal");
+    } else {
+      // Pass phone to the other player
+      setTurn(turn === 0 ? 1 : 0);
+      setPhase("ready");
     }
-    setPhase("reveal");
   };
 
   const next = () => {
-    const isLastTurn = turn === 1;
     const isLastRound = round === ROUNDS - 1;
-    if (isLastTurn && isLastRound) {
+    if (isLastRound) {
       setPhase("done");
       return;
     }
-    if (isLastTurn) {
-      setRound((r) => r + 1);
-      setTurn(0);
-    } else {
-      setTurn(1);
-    }
-    setPicked(null);
+    setRound((r) => r + 1);
+    setTurn(0);
+    setPicks([null, null]);
     setPhase("ready");
   };
 
@@ -89,7 +92,7 @@ function VersusPage() {
     setPhase("setup");
     setQuestions([]);
     setScores([0, 0]);
-    setPicked(null);
+    setPicks([null, null]);
     setRound(0);
     setTurn(0);
   };
@@ -105,7 +108,7 @@ function VersusPage() {
             Challenge a <span className="text-gradient-gold">classmate</span>
           </h1>
           <p className="text-muted-foreground mt-3 text-sm md:text-base">
-            Two players, one phone. Take turns answering {ROUNDS} questions each. Highest score wins.
+            Two players, one phone. Both answer the same question each round — the correct answer stays hidden until you both pick.
           </p>
         </header>
 
@@ -166,22 +169,26 @@ function VersusPage() {
         {(phase === "ready" || phase === "answer" || phase === "reveal") && (
           <>
             <div className="grid grid-cols-2 gap-3 mb-5">
-              {[0, 1].map((i) => (
-                <div
-                  key={i}
-                  className={`rounded-2xl border p-4 transition-all ${
-                    turn === i && phase !== "reveal"
-                      ? "border-gold bg-gold/10 glow-gold"
-                      : "border-border bg-gradient-card"
-                  }`}
-                >
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {turn === i && phase !== "reveal" ? "Your turn" : "Player " + (i + 1)}
+              {[0, 1].map((i) => {
+                const hasAnswered = picks[i] !== null;
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-2xl border p-4 transition-all ${
+                      turn === i && phase !== "reveal"
+                        ? "border-gold bg-gold/10 glow-gold"
+                        : "border-border bg-gradient-card"
+                    }`}
+                  >
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {turn === i && phase !== "reveal" ? "Your turn" : "Player " + (i + 1)}
+                      {phase !== "reveal" && hasAnswered ? " · answered" : ""}
+                    </div>
+                    <div className="font-display font-bold text-lg truncate">{names[i]}</div>
+                    <div className="text-3xl font-display font-bold text-gradient-gold">{scores[i]}</div>
                   </div>
-                  <div className="font-display font-bold text-lg truncate">{names[i]}</div>
-                  <div className="text-3xl font-display font-bold text-gradient-gold">{scores[i]}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-center text-xs text-muted-foreground mb-3">
@@ -193,7 +200,11 @@ function VersusPage() {
               <div className="rounded-3xl bg-gradient-card border border-border p-8 text-center">
                 <div className="text-5xl mb-4">📱➡️</div>
                 <h2 className="font-display text-2xl font-bold">Pass the phone to {names[turn]}</h2>
-                <p className="text-muted-foreground text-sm mt-2">Ready to answer?</p>
+                <p className="text-muted-foreground text-sm mt-2">
+                  {picks[turn === 0 ? 1 : 0] !== null
+                    ? "Your opponent has answered. Now it's your turn — no peeking at the result yet."
+                    : "Answer the question. The other player will answer the same question next."}
+                </p>
                 <button
                   onClick={() => setPhase("answer")}
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
@@ -211,11 +222,12 @@ function VersusPage() {
                 <div className="mt-5 space-y-2">
                   {current.options.map((opt, i) => {
                     const isAnswer = i === current.answer;
-                    const isPicked = i === picked;
+                    const p1Pick = picks[0] === i;
+                    const p2Pick = picks[1] === i;
                     let cls = "border-border bg-secondary hover:border-gold/40";
                     if (phase === "reveal") {
                       if (isAnswer) cls = "border-emerald-500 bg-emerald-500/10";
-                      else if (isPicked) cls = "border-destructive bg-destructive/10";
+                      else if (p1Pick || p2Pick) cls = "border-destructive bg-destructive/10";
                       else cls = "border-border bg-secondary opacity-60";
                     }
                     return (
@@ -227,6 +239,15 @@ function VersusPage() {
                       >
                         <span className="font-semibold mr-2">{String.fromCharCode(65 + i)}.</span>
                         {opt}
+                        {phase === "reveal" && (p1Pick || p2Pick) && (
+                          <span className="ml-2 text-[11px] font-semibold text-gold">
+                            {p1Pick && p2Pick
+                              ? `← ${names[0]} & ${names[1]}`
+                              : p1Pick
+                                ? `← ${names[0]}`
+                                : `← ${names[1]}`}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -234,15 +255,16 @@ function VersusPage() {
 
                 {phase === "reveal" && (
                   <div className="mt-5 rounded-xl bg-secondary border border-border p-4">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-gold mb-1">
-                      {picked === current.answer ? `✓ Correct! +1 for ${names[turn]}` : "✗ Wrong"}
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gold mb-2">
+                      {names[0]}: {picks[0] === current.answer ? "✓ +1" : "✗"} · {names[1]}:{" "}
+                      {picks[1] === current.answer ? "✓ +1" : "✗"}
                     </div>
                     <p className="text-sm text-muted-foreground">{current.explain}</p>
                     <button
                       onClick={next}
                       className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.01] transition-transform"
                     >
-                      {round === ROUNDS - 1 && turn === 1 ? "See the winner" : "Next turn"}{" "}
+                      {round === ROUNDS - 1 ? "See the winner" : "Next round"}{" "}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
