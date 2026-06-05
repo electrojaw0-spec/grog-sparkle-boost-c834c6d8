@@ -155,17 +155,21 @@ function OnlineVersusPage() {
     if (myPick !== null) return; // already answered
 
     lockRef.current = true;
-    const myCol = seat === 0 ? "p1_pick" : "p2_pick";
     const otherPick = seat === 0 ? room.p2_pick : room.p1_pick;
 
-    // Compute next state. If the opponent has already picked, both are now done → reveal.
-    const update: Record<string, unknown> = {
-      [myCol]: i,
+    const update: {
+      p1_pick?: number | null;
+      p2_pick?: number | null;
+      scores?: number[];
+      phase?: "ready" | "answer" | "reveal" | "done";
+      updated_at: string;
+    } = {
       updated_at: new Date().toISOString(),
     };
+    if (seat === 0) update.p1_pick = i;
+    else update.p2_pick = i;
 
     if (otherPick !== null) {
-      // Both have answered — compute scores and flip to reveal
       const p1 = seat === 0 ? i : room.p1_pick!;
       const p2 = seat === 1 ? i : room.p2_pick!;
       const nextScores = [...room.scores];
