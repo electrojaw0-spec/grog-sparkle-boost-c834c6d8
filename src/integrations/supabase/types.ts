@@ -52,6 +52,8 @@ export type Database = {
           current_turn: number
           id: string
           last_pick: number | null
+          p1_pick: number | null
+          p2_pick: number | null
           phase: string
           player1_name: string
           player2_name: string | null
@@ -68,6 +70,8 @@ export type Database = {
           current_turn?: number
           id?: string
           last_pick?: number | null
+          p1_pick?: number | null
+          p2_pick?: number | null
           phase?: string
           player1_name: string
           player2_name?: string | null
@@ -84,6 +88,8 @@ export type Database = {
           current_turn?: number
           id?: string
           last_pick?: number | null
+          p1_pick?: number | null
+          p2_pick?: number | null
           phase?: string
           player1_name?: string
           player2_name?: string | null

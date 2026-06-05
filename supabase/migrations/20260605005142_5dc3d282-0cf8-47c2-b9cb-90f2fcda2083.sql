@@ -1,0 +1,1 @@
+ALTER TABLE public.versus_rooms ADD COLUMN IF NOT EXISTS p1_pick integer, ADD COLUMN IF NOT EXISTS p2_pick integer;
