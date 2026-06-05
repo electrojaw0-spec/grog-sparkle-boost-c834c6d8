@@ -33,6 +33,8 @@ type Room = {
   current_turn: number;
   scores: number[];
   last_pick: number | null;
+  p1_pick: number | null;
+  p2_pick: number | null;
 };
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -84,7 +86,9 @@ function OnlineVersusPage() {
   );
   const pool = room ? QUESTIONS[room.subject_id] ?? [] : [];
   const current = room ? pool[room.question_indexes[room.current_round]] : null;
-  const isMyTurn = room && seat === room.current_turn;
+  const myPick = room && seat !== null ? (seat === 0 ? room.p1_pick : room.p2_pick) : null;
+  const oppPick = room && seat !== null ? (seat === 0 ? room.p2_pick : room.p1_pick) : null;
+  const bothAnswered = room ? room.p1_pick !== null && room.p2_pick !== null : false;
 
   async function createRoom() {
     if (!name.trim()) return setErr("Enter your name");
@@ -99,6 +103,7 @@ function OnlineVersusPage() {
         subject_id: subjectId,
         player1_name: name.trim(),
         question_indexes: indexes,
+        phase: "answer",
       })
       .select()
       .single();
@@ -129,7 +134,12 @@ function OnlineVersusPage() {
     }
     const { data, error } = await supabase
       .from("versus_rooms")
-      .update({ player2_name: name.trim(), status: "playing", updated_at: new Date().toISOString() })
+      .update({
+        player2_name: name.trim(),
+        status: "playing",
+        phase: "answer",
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", found.id)
       .select()
       .single();
@@ -140,57 +150,53 @@ function OnlineVersusPage() {
   }
 
   async function answer(i: number) {
-    if (!room || !current || lockRef.current) return;
-    if (room.phase !== "answer" || !isMyTurn) return;
+    if (!room || !current || lockRef.current || seat === null) return;
+    if (room.phase !== "answer") return;
+    if (myPick !== null) return; // already answered
+
     lockRef.current = true;
-    const correct = i === current.answer;
-    const nextScores = [...room.scores];
-    if (correct) nextScores[room.current_turn] += 1;
-    const { error } = await supabase
-      .from("versus_rooms")
-      .update({ phase: "reveal", last_pick: i, scores: nextScores, updated_at: new Date().toISOString() })
-      .eq("id", room.id);
+    const myCol = seat === 0 ? "p1_pick" : "p2_pick";
+    const otherPick = seat === 0 ? room.p2_pick : room.p1_pick;
+
+    // Compute next state. If the opponent has already picked, both are now done → reveal.
+    const update: Record<string, unknown> = {
+      [myCol]: i,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (otherPick !== null) {
+      // Both have answered — compute scores and flip to reveal
+      const p1 = seat === 0 ? i : room.p1_pick!;
+      const p2 = seat === 1 ? i : room.p2_pick!;
+      const nextScores = [...room.scores];
+      if (p1 === current.answer) nextScores[0] += 1;
+      if (p2 === current.answer) nextScores[1] += 1;
+      update.scores = nextScores;
+      update.phase = "reveal";
+    }
+
+    const { error } = await supabase.from("versus_rooms").update(update).eq("id", room.id);
     lockRef.current = false;
     if (error) setErr(error.message);
   }
 
-  async function startTurn() {
+  async function nextRound() {
     if (!room || lockRef.current) return;
     lockRef.current = true;
-    await supabase
-      .from("versus_rooms")
-      .update({ phase: "answer", last_pick: null, updated_at: new Date().toISOString() })
-      .eq("id", room.id);
-    lockRef.current = false;
-  }
-
-  async function nextTurn() {
-    if (!room || lockRef.current) return;
-    lockRef.current = true;
-    const isLastTurn = room.current_turn === 1;
     const isLastRound = room.current_round === ROUNDS - 1;
-    if (isLastTurn && isLastRound) {
+    if (isLastRound) {
       await supabase
         .from("versus_rooms")
         .update({ phase: "done", status: "done", updated_at: new Date().toISOString() })
-        .eq("id", room.id);
-    } else if (isLastTurn) {
-      await supabase
-        .from("versus_rooms")
-        .update({
-          current_round: room.current_round + 1,
-          current_turn: 0,
-          phase: "ready",
-          last_pick: null,
-          updated_at: new Date().toISOString(),
-        })
         .eq("id", room.id);
     } else {
       await supabase
         .from("versus_rooms")
         .update({
-          current_turn: 1,
-          phase: "ready",
+          current_round: room.current_round + 1,
+          phase: "answer",
+          p1_pick: null,
+          p2_pick: null,
           last_pick: null,
           updated_at: new Date().toISOString(),
         })
@@ -209,7 +215,9 @@ function OnlineVersusPage() {
         current_round: 0,
         current_turn: 0,
         scores: [0, 0],
-        phase: "ready",
+        phase: "answer",
+        p1_pick: null,
+        p2_pick: null,
         last_pick: null,
         status: "playing",
         updated_at: new Date().toISOString(),
@@ -244,7 +252,7 @@ function OnlineVersusPage() {
             Battle a friend <span className="text-gradient-gold">online</span>
           </h1>
           <p className="text-muted-foreground mt-3 text-sm md:text-base">
-            Create a room, share the 6-letter code with a friend, and play in real time on two phones.
+            Both players answer the same question — the correct answer stays hidden until you both lock in.
           </p>
         </header>
 
@@ -388,49 +396,31 @@ function OnlineVersusPage() {
         {room && room.status === "playing" && (
           <>
             <div className="grid grid-cols-2 gap-3 mb-5">
-              {[0, 1].map((i) => (
-                <div
-                  key={i}
-                  className={`rounded-2xl border p-4 transition-all ${
-                    room.current_turn === i && room.phase !== "reveal"
-                      ? "border-gold bg-gold/10 glow-gold"
-                      : "border-border bg-gradient-card"
-                  }`}
-                >
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {seat === i ? "You" : "Opponent"}
-                    {room.current_turn === i && room.phase !== "reveal" ? " · turn" : ""}
+              {[0, 1].map((i) => {
+                const playerPick = i === 0 ? room.p1_pick : room.p2_pick;
+                const answered = playerPick !== null;
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-2xl border p-4 transition-all ${
+                      seat === i ? "border-gold bg-gold/10 glow-gold" : "border-border bg-gradient-card"
+                    }`}
+                  >
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {seat === i ? "You" : "Opponent"}
+                      {room.phase === "answer" && answered ? " · answered" : ""}
+                    </div>
+                    <div className="font-display font-bold text-lg truncate">{names[i]}</div>
+                    <div className="text-3xl font-display font-bold text-gradient-gold">{room.scores[i]}</div>
                   </div>
-                  <div className="font-display font-bold text-lg truncate">{names[i]}</div>
-                  <div className="text-3xl font-display font-bold text-gradient-gold">{room.scores[i]}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-center text-xs text-muted-foreground mb-3">
               Round {room.current_round + 1} of {ROUNDS} · {subject.emoji} {subject.name} · Code{" "}
               <span className="font-semibold">{room.code}</span>
             </div>
-
-            {room.phase === "ready" && (
-              <div className="rounded-3xl bg-gradient-card border border-border p-8 text-center">
-                <div className="text-5xl mb-4">{isMyTurn ? "🎯" : "⏳"}</div>
-                <h2 className="font-display text-2xl font-bold">
-                  {isMyTurn ? "Your turn" : `${names[room.current_turn]}'s turn`}
-                </h2>
-                <p className="text-muted-foreground text-sm mt-2">
-                  {isMyTurn ? "Tap to reveal the question" : "Waiting for them to start…"}
-                </p>
-                {isMyTurn && (
-                  <button
-                    onClick={startTurn}
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
-                  >
-                    Show question <ChevronRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            )}
 
             {(room.phase === "answer" || room.phase === "reveal") && current && (
               <div className="rounded-3xl bg-gradient-card border border-border p-6">
@@ -439,47 +429,60 @@ function OnlineVersusPage() {
                 <div className="mt-5 space-y-2">
                   {current.options.map((opt, i) => {
                     const isAnswer = i === current.answer;
-                    const isPicked = i === room.last_pick;
+                    const isMyPick = myPick === i;
+                    const isOppPick = oppPick === i;
                     let cls = "border-border bg-secondary";
-                    if (room.phase === "answer" && isMyTurn) cls += " hover:border-gold/40 cursor-pointer";
+                    if (room.phase === "answer") {
+                      if (isMyPick) cls = "border-gold bg-gold/10";
+                      else if (myPick === null) cls += " hover:border-gold/40 cursor-pointer";
+                      else cls += " opacity-60";
+                    }
                     if (room.phase === "reveal") {
                       if (isAnswer) cls = "border-emerald-500 bg-emerald-500/10";
-                      else if (isPicked) cls = "border-destructive bg-destructive/10";
+                      else if (isMyPick || isOppPick) cls = "border-destructive bg-destructive/10";
                       else cls = "border-border bg-secondary opacity-60";
                     }
                     return (
                       <button
                         key={i}
-                        disabled={room.phase !== "answer" || !isMyTurn}
+                        disabled={room.phase !== "answer" || myPick !== null}
                         onClick={() => answer(i)}
                         className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all ${cls}`}
                       >
                         <span className="font-semibold mr-2">{String.fromCharCode(65 + i)}.</span>
                         {opt}
+                        {room.phase === "reveal" && (isMyPick || isOppPick) && (
+                          <span className="ml-2 text-[11px] font-semibold text-gold">
+                            {isMyPick && isOppPick
+                              ? "← both of you"
+                              : isMyPick
+                                ? "← you"
+                                : "← opponent"}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
                 </div>
 
-                {room.phase === "answer" && !isMyTurn && (
+                {room.phase === "answer" && myPick !== null && !bothAnswered && (
                   <div className="mt-4 text-center text-xs text-muted-foreground inline-flex items-center gap-2 justify-center w-full">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> {names[room.current_turn]} is answering…
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waiting for opponent to answer…
                   </div>
                 )}
 
                 {room.phase === "reveal" && (
                   <div className="mt-5 rounded-xl bg-secondary border border-border p-4">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-gold mb-1">
-                      {room.last_pick === current.answer
-                        ? `✓ Correct! +1 for ${names[room.current_turn]}`
-                        : "✗ Wrong"}
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gold mb-2">
+                      {names[0]}: {room.p1_pick === current.answer ? "✓ +1" : "✗"} · {names[1]}:{" "}
+                      {room.p2_pick === current.answer ? "✓ +1" : "✗"}
                     </div>
                     <p className="text-sm text-muted-foreground">{current.explain}</p>
                     <button
-                      onClick={nextTurn}
+                      onClick={nextRound}
                       className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.01] transition-transform"
                     >
-                      {room.current_round === ROUNDS - 1 && room.current_turn === 1 ? "See the winner" : "Next turn"}{" "}
+                      {room.current_round === ROUNDS - 1 ? "See the winner" : "Next round"}{" "}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
