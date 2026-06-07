@@ -89,20 +89,21 @@ export function TutorPaywall({ onUnlock }: { onUnlock: (until: number) => void }
         <div className="mt-5 inline-flex flex-col items-center gap-2 w-full rounded-2xl bg-[#0055FF]/10 border border-[#0055FF]/30 px-6 py-4 text-sm">
           <p className="font-medium text-[#0055FF]">Send on Wave to</p>
           <p className="font-display text-2xl font-bold text-white">+220 369 2876</p>
-          <p className="text-xs text-muted-foreground">Include your name, then message us on WhatsApp</p>
+          <p className="text-xs text-muted-foreground">Include your name in the Wave note</p>
         </div>
-        <p className="text-[11px] text-muted-foreground mt-2">
-          After paying, send your payment screenshot on
-          <a
-            href="https://wa.me/2203692876?text=Hi%2C%20I%20just%20paid%20for%20Scholly%20AI%20Tutor%20access"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-0.5 text-[#25D366] hover:underline font-medium ml-0.5"
-          >
-            <MessageCircle className="h-3 w-3" /> WhatsApp
-          </a>
-          {" "}to get your code.
-        </p>
+
+        <a
+          href="https://wa.me/2203692876?text=Hi%2C%20I%20just%20paid%20for%20Scholly%20AI%20Tutor%20access%20-%20please%20send%20my%20code"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 w-full inline-flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] transition-all hover:scale-[1.02] px-6 py-4 text-white font-bold text-base shadow-lg shadow-[#25D366]/30 animate-pulse"
+        >
+          <MessageCircle className="h-8 w-8 shrink-0" />
+          <span className="text-left leading-tight">
+            Click here to get your code
+            <span className="block text-xs font-medium opacity-90">Chat us on WhatsApp</span>
+          </span>
+        </a>
 
         <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
           <div className="flex-1 h-px bg-border" />
