@@ -23,8 +23,18 @@ const SUGGESTIONS = [
   "Solve: 3x + 7 = 22",
 ];
 
+const FREE_LIMIT = 7;
+const FREE_KEY = "scholly_tutor_free_used";
+
 function TutorPage() {
   const access = useTutorAccess();
+  const [freeUsed, setFreeUsed] = useState(0);
+  useEffect(() => {
+    const raw = localStorage.getItem(FREE_KEY);
+    setFreeUsed(raw ? parseInt(raw, 10) || 0 : 0);
+  }, []);
+  const freeLeft = Math.max(0, FREE_LIMIT - freeUsed);
+  const outOfFree = !access.hasAccess && freeUsed >= FREE_LIMIT;
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -38,11 +48,17 @@ function TutorPage() {
   async function send(text?: string) {
     const content = (text ?? input).trim();
     if (!content || streaming) return;
+    if (!access.hasAccess && freeUsed >= FREE_LIMIT) return;
     setError(null);
     setInput("");
     const next: Msg[] = [...messages, { role: "user", content }, { role: "assistant", content: "" }];
     setMessages(next);
     setStreaming(true);
+    if (!access.hasAccess) {
+      const nu = freeUsed + 1;
+      setFreeUsed(nu);
+      localStorage.setItem(FREE_KEY, String(nu));
+    }
 
     try {
       const res = await fetch("/api/public/chat", {
@@ -78,8 +94,11 @@ function TutorPage() {
 
   return (
     <AppShell>
-      {!access.hasAccess ? (
-        <TutorPaywall onUnlock={(until) => access.grant(until - Date.now())} />
+      {outOfFree ? (
+        <TutorPaywall
+          onUnlock={(until) => access.grant(until - Date.now())}
+          reason={`You've used your ${FREE_LIMIT} free messages. Unlock unlimited tutoring to keep going.`}
+        />
       ) : (
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
@@ -92,6 +111,23 @@ function TutorPage() {
             <p className="text-xs text-muted-foreground">Online · Trained on the WAEC syllabus</p>
           </div>
         </div>
+
+        {!access.hasAccess && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-2.5 text-xs">
+            <span className="text-muted-foreground">
+              Free trial: <span className="font-semibold text-gold">{freeLeft}</span> of {FREE_LIMIT} messages left
+            </span>
+            <a
+              href="https://wa.me/2203692876?text=Hi%2C%20I%20want%20to%20unlock%20Scholly%20AI%20Tutor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-gold hover:underline"
+            >
+              Unlock →
+            </a>
+          </div>
+        )}
+
 
         <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
