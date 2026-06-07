@@ -48,11 +48,17 @@ function TutorPage() {
   async function send(text?: string) {
     const content = (text ?? input).trim();
     if (!content || streaming) return;
+    if (!access.hasAccess && freeUsed >= FREE_LIMIT) return;
     setError(null);
     setInput("");
     const next: Msg[] = [...messages, { role: "user", content }, { role: "assistant", content: "" }];
     setMessages(next);
     setStreaming(true);
+    if (!access.hasAccess) {
+      const nu = freeUsed + 1;
+      setFreeUsed(nu);
+      localStorage.setItem(FREE_KEY, String(nu));
+    }
 
     try {
       const res = await fetch("/api/public/chat", {
