@@ -66,6 +66,11 @@ export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) =
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-xl">
       <div className="glass rounded-3xl p-6 md:p-8 text-center">
+        {reason && (
+          <div className="mb-4 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold font-medium">
+            {reason}
+          </div>
+        )}
         <div className="h-16 w-16 mx-auto rounded-3xl bg-gradient-gold grid place-items-center glow-gold mb-4">
           <Lock className="h-7 w-7 text-gold-foreground" />
         </div>
