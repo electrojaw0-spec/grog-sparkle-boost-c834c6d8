@@ -23,8 +23,18 @@ const SUGGESTIONS = [
   "Solve: 3x + 7 = 22",
 ];
 
+const FREE_LIMIT = 7;
+const FREE_KEY = "scholly_tutor_free_used";
+
 function TutorPage() {
   const access = useTutorAccess();
+  const [freeUsed, setFreeUsed] = useState(0);
+  useEffect(() => {
+    const raw = localStorage.getItem(FREE_KEY);
+    setFreeUsed(raw ? parseInt(raw, 10) || 0 : 0);
+  }, []);
+  const freeLeft = Math.max(0, FREE_LIMIT - freeUsed);
+  const outOfFree = !access.hasAccess && freeUsed >= FREE_LIMIT;
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
