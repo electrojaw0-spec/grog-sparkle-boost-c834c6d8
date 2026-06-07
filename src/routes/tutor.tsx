@@ -112,6 +112,23 @@ function TutorPage() {
           </div>
         </div>
 
+        {!access.hasAccess && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-2.5 text-xs">
+            <span className="text-muted-foreground">
+              Free trial: <span className="font-semibold text-gold">{freeLeft}</span> of {FREE_LIMIT} messages left
+            </span>
+            <a
+              href="https://wa.me/2203692876?text=Hi%2C%20I%20want%20to%20unlock%20Scholly%20AI%20Tutor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-gold hover:underline"
+            >
+              Unlock →
+            </a>
+          </div>
+        )}
+
+
         <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
