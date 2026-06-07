@@ -25,7 +25,7 @@ export function useTutorAccess() {
   };
 }
 
-export function TutorPaywall({ onUnlock }: { onUnlock: (until: number) => void }) {
+export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) => void; reason?: string }) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
