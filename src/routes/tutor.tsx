@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Bot, User, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Send, Sparkles, Bot, User, Loader2, Lock, MessageCircle } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 
 export const Route = createFileRoute("/tutor")({
@@ -29,26 +29,40 @@ const FREE_KEY = "scholly_tutor_free_used";
 function TutorPage() {
   const access = useTutorAccess();
   const [freeUsed, setFreeUsed] = useState(0);
+
   useEffect(() => {
     const raw = localStorage.getItem(FREE_KEY);
     setFreeUsed(raw ? parseInt(raw, 10) || 0 : 0);
   }, []);
+
   const freeLeft = Math.max(0, FREE_LIMIT - freeUsed);
   const outOfFree = !access.hasAccess && freeUsed >= FREE_LIMIT;
+
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFullPaywall, setShowFullPaywall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streaming]);
 
-  async function send(text?: string) {
+  // Show full paywall when they run out of free messages
+  useEffect(() => {
+    if (outOfFree) {
+      setShowFullPaywall(true);
+    }
+  }, [outOfFree]);
+
+  const send = useCallback(async (text?: string) => {
     const content = (text ?? input).trim();
     if (!content || streaming) return;
-    if (!access.hasAccess && freeUsed >= FREE_LIMIT) return;
+    if (!access.hasAccess && freeUsed >= FREE_LIMIT) {
+      setShowFullPaywall(true);
+      return;
+    }
     setError(null);
     setInput("");
     const next: Msg[] = [...messages, { role: "user", content }, { role: "assistant", content: "" }];
@@ -90,16 +104,10 @@ function TutorPage() {
     } finally {
       setStreaming(false);
     }
-  }
+  }, [input, streaming, freeUsed, access.hasAccess, messages]);
 
   return (
     <AppShell>
-      {outOfFree ? (
-        <TutorPaywall
-          onUnlock={(until) => access.grant(until - Date.now())}
-          reason={`You've used your ${FREE_LIMIT} free messages. Unlock unlimited tutoring to keep going.`}
-        />
-      ) : (
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
@@ -112,22 +120,38 @@ function TutorPage() {
           </div>
         </div>
 
+        {/* Prominent free trial counter */}
         {!access.hasAccess && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-2.5 text-xs">
-            <span className="text-muted-foreground">
-              Free trial: <span className="font-semibold text-gold">{freeLeft}</span> of {FREE_LIMIT} messages left
-            </span>
-            <a
-              href="https://wa.me/2203692876?text=Hi%2C%20I%20want%20to%20unlock%20Scholly%20AI%20Tutor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-gold hover:underline"
-            >
-              Unlock →
-            </a>
+          <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-gold" />
+                <span className="text-sm font-medium text-gold-foreground">
+                  Free trial: <span className="font-bold text-gold">{freeLeft}</span> of {FREE_LIMIT} messages left
+                </span>
+              </div>
+              {outOfFree ? (
+                <button
+                  onClick={() => setShowFullPaywall(true)}
+                  className="text-sm font-bold text-gold hover:underline animate-pulse"
+                >
+                  Unlock →
+                </button>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {freeLeft === 1 ? "1 message remaining" : `${freeLeft} messages remaining`}
+                </span>
+              )}
+            </div>
+            {/* Progress bar */}
+            <div className="mt-2 h-2 w-full rounded-full bg-secondary overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-gold transition-all duration-500"
+                style={{ width: `${(freeLeft / FREE_LIMIT) * 100}%` }}
+              />
+            </div>
           </div>
         )}
-
 
         <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
@@ -140,8 +164,12 @@ function TutorPage() {
                 <p className="text-sm text-muted-foreground mt-2 max-w-md">Pick a starter or type your own question. Scholly streams answers in real-time.</p>
                 <div className="mt-6 grid sm:grid-cols-2 gap-2 w-full max-w-xl">
                   {SUGGESTIONS.map((s) => (
-                    <button key={s} onClick={() => send(s)}
-                      className="text-left text-sm rounded-xl bg-secondary hover:bg-secondary transition-colors p-3 border border-border">
+                    <button
+                      key={s}
+                      onClick={() => send(s)}
+                      disabled={outOfFree}
+                      className="text-left text-sm rounded-xl bg-secondary hover:bg-secondary/80 transition-colors p-3 border border-border disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
                       {s}
                     </button>
                   ))}
@@ -177,30 +205,72 @@ function TutorPage() {
             )}
           </div>
 
-          <form
-            onSubmit={(e) => { e.preventDefault(); send(); }}
-            className="border-t border-border p-3 md:p-4 flex items-end gap-2"
-          >
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-              }}
-              placeholder="Ask about any WAEC topic…"
-              rows={1}
-              className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
-            />
-            <button
-              type="submit"
-              disabled={streaming || !input.trim()}
-              className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
+          {/* Input area — replaced with paywall CTA when out of free messages */}
+          {outOfFree && !access.hasAccess ? (
+            <div className="border-t border-border p-4 md:p-5 bg-card/50">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="flex items-center gap-2 text-gold">
+                  <Lock className="h-5 w-5" />
+                  <span className="font-semibold text-sm">You've used all {FREE_LIMIT} free messages</span>
+                </div>
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  Unlock unlimited access to keep chatting with Scholly Tutor.
+                </p>
+                <button
+                  onClick={() => setShowFullPaywall(true)}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-gold px-6 py-2.5 text-sm font-bold text-gold-foreground hover:scale-[1.02] transition-transform glow-gold"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Unlock Unlimited Tutoring
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => { e.preventDefault(); send(); }}
+              className="border-t border-border p-3 md:p-4 flex items-end gap-2"
             >
-              {streaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-            </button>
-          </form>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                }}
+                placeholder={freeLeft <= 2 && !access.hasAccess ? `Only ${freeLeft} free message${freeLeft === 1 ? "" : "s"} left…` : "Ask about any WAEC topic…"}
+                rows={1}
+                className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
+              />
+              <button
+                type="submit"
+                disabled={streaming || !input.trim()}
+                className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
+              >
+                {streaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+              </button>
+            </form>
+          )}
         </div>
       </div>
+
+      {/* Full-screen paywall overlay */}
+      {showFullPaywall && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={() => setShowFullPaywall(false)}
+              className="h-10 w-10 rounded-full bg-secondary grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          <TutorPaywall
+            onUnlock={(until) => {
+              access.grant(until - Date.now());
+              setShowFullPaywall(false);
+            }}
+            reason={outOfFree ? `You've used your ${FREE_LIMIT} free messages. Unlock unlimited tutoring to keep going.` : undefined}
+          />
+        </div>
       )}
     </AppShell>
   );
