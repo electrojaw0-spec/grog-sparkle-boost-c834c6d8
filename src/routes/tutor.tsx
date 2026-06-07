@@ -94,8 +94,11 @@ function TutorPage() {
 
   return (
     <AppShell>
-      {!access.hasAccess ? (
-        <TutorPaywall onUnlock={(until) => access.grant(until - Date.now())} />
+      {outOfFree ? (
+        <TutorPaywall
+          onUnlock={(until) => access.grant(until - Date.now())}
+          reason={`You've used your ${FREE_LIMIT} free messages. Unlock unlimited tutoring to keep going.`}
+        />
       ) : (
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
