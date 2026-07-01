@@ -66,24 +66,27 @@ function TutorPage() {
 
   const startTypewriter = useCallback((onDrained: () => void) => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    const tick = () => {
+    let displayed = 0;
+    let lastTs = performance.now();
+    const CPS = 90; // baseline chars/sec for smooth typewriter feel
+    const tick = (ts: number) => {
+      const dt = Math.max(0, ts - lastTs) / 1000;
+      lastTs = ts;
       const target = targetRef.current;
-      setLiveText((prev) => {
-        if (prev.length >= target.length) {
-          if (!streamingRef.current) {
-            rafRef.current = null;
-            onDrained();
-            return prev;
-          }
-          rafRef.current = requestAnimationFrame(tick);
-          return prev;
-        }
-        const remaining = target.length - prev.length;
-        // Adaptive: catch up on bursts, stay smooth on slow streams.
-        const step = Math.min(remaining, Math.max(1, Math.ceil(remaining / 30)), 8);
-        return target.slice(0, prev.length + step);
-      });
-      rafRef.current = requestAnimationFrame(tick);
+      const remaining = target.length - displayed;
+      if (remaining > 0) {
+        // Adaptive: base rate + catch-up when the buffer runs far ahead
+        const catchUp = Math.floor(remaining / 25);
+        const step = Math.max(1, Math.min(remaining, Math.round(CPS * dt) + catchUp));
+        displayed += step;
+        setLiveText(target.slice(0, displayed));
+      }
+      if (displayed < targetRef.current.length || streamingRef.current) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+        onDrained();
+      }
     };
     rafRef.current = requestAnimationFrame(tick);
   }, []);
