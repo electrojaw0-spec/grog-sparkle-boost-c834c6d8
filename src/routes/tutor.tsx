@@ -234,12 +234,32 @@ function TutorPage() {
                     ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
                     : "bg-card border border-border rounded-tl-sm"
                 }`}>
-                  {m.content || (streaming && i === messages.length - 1
-                    ? <span className="inline-flex gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" /><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.15s" }} /><span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.3s" }} /></span>
-                    : "")}
+                  {m.content}
                 </div>
               </div>
             ))}
+
+            {liveActive && (
+              <div className="flex gap-3">
+                <div className="h-8 w-8 shrink-0 rounded-xl grid place-items-center bg-gradient-primary">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap bg-card border border-border rounded-tl-sm">
+                  {liveText.length === 0 ? (
+                    <span className="inline-flex gap-1">
+                      <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" />
+                      <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.15s" }} />
+                      <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0.3s" }} />
+                    </span>
+                  ) : (
+                    <>
+                      {liveText}
+                      <span className="inline-block w-[2px] h-4 -mb-0.5 ml-0.5 bg-primary align-middle animate-pulse" />
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive-foreground">
