@@ -45,16 +45,48 @@ function TutorPage() {
   const [showFullPaywall, setShowFullPaywall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Typewriter: target holds the full accumulated stream; liveText is what's shown.
+  const targetRef = useRef<string>("");
+  const streamingRef = useRef<boolean>(false);
+  const [liveText, setLiveText] = useState<string>("");
+  const [liveActive, setLiveActive] = useState<boolean>(false);
+  const rafRef = useRef<number | null>(null);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, streaming]);
+  }, [messages, liveText, streaming]);
 
-  // Show full paywall when they run out of free messages
   useEffect(() => {
-    if (outOfFree) {
-      setShowFullPaywall(true);
-    }
+    if (outOfFree) setShowFullPaywall(true);
   }, [outOfFree]);
+
+  useEffect(() => () => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const startTypewriter = useCallback((onDrained: () => void) => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    const tick = () => {
+      const target = targetRef.current;
+      setLiveText((prev) => {
+        if (prev.length >= target.length) {
+          if (!streamingRef.current) {
+            rafRef.current = null;
+            onDrained();
+            return prev;
+          }
+          rafRef.current = requestAnimationFrame(tick);
+          return prev;
+        }
+        const remaining = target.length - prev.length;
+        // Adaptive: catch up on bursts, stay smooth on slow streams.
+        const step = Math.min(remaining, Math.max(1, Math.ceil(remaining / 30)), 8);
+        return target.slice(0, prev.length + step);
+      });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, []);
 
   const send = useCallback(async (text?: string) => {
     const content = (text ?? input).trim();
@@ -65,20 +97,33 @@ function TutorPage() {
     }
     setError(null);
     setInput("");
-    const next: Msg[] = [...messages, { role: "user", content }, { role: "assistant", content: "" }];
-    setMessages(next);
+    const baseMessages: Msg[] = [...messages, { role: "user", content }];
+    setMessages(baseMessages);
     setStreaming(true);
+    streamingRef.current = true;
+    targetRef.current = "";
+    setLiveText("");
+    setLiveActive(true);
     if (!access.hasAccess) {
       const nu = freeUsed + 1;
       setFreeUsed(nu);
       localStorage.setItem(FREE_KEY, String(nu));
     }
 
+    startTypewriter(() => {
+      const finalText = targetRef.current;
+      setLiveActive(false);
+      setLiveText("");
+      if (finalText) {
+        setMessages((prev) => [...prev, { role: "assistant", content: finalText }]);
+      }
+    });
+
     try {
       const res = await fetch("/api/public/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next.slice(0, -1) }),
+        body: JSON.stringify({ messages: baseMessages }),
       });
       if (!res.ok || !res.body) {
         const body = await res.text().catch(() => "");
@@ -86,25 +131,23 @@ function TutorPage() {
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let acc = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        acc += decoder.decode(value, { stream: true });
-        setMessages((prev) => {
-          const copy = [...prev];
-          copy[copy.length - 1] = { role: "assistant", content: acc };
-          return copy;
-        });
+        targetRef.current += decoder.decode(value, { stream: true });
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
       setError(msg);
-      setMessages((prev) => prev.slice(0, -1));
+      setLiveActive(false);
+      setLiveText("");
+      targetRef.current = "";
+      if (rafRef.current != null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     } finally {
       setStreaming(false);
+      streamingRef.current = false;
     }
-  }, [input, streaming, freeUsed, access.hasAccess, messages]);
+  }, [input, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
 
   return (
     <AppShell>
