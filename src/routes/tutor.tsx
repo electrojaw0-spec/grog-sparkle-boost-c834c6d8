@@ -177,7 +177,7 @@ function TutorPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl pb-24 md:pb-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
             <Bot className="h-6 w-6 text-primary-foreground" />
