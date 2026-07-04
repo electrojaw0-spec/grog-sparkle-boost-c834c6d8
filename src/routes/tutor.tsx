@@ -177,7 +177,7 @@ function TutorPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl pb-24 md:pb-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
             <Bot className="h-6 w-6 text-primary-foreground" />
@@ -222,7 +222,7 @@ function TutorPage() {
           </div>
         )}
 
-        <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
+        <div className="glass rounded-3xl flex flex-col h-[calc(100dvh-16rem)] min-h-[420px] md:h-[70vh] overflow-hidden">
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center px-6">

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Sparkles, Home, MessageSquare, BookOpen, Swords, Wifi } from "lucide-react";
+import { Sparkles, Home, MessageSquare, BookOpen, Swords, Wifi, Trophy } from "lucide-react";
 import schollyLogo from "@/assets/scholly-logo.png";
 
 const NAV = [
@@ -8,6 +8,7 @@ const NAV = [
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/versus", label: "Versus", icon: Swords },
   { to: "/versus-online", label: "Online", icon: Wifi },
+  { to: "/leaderboard", label: "Ranks", icon: Trophy },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -50,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">{children}</main>
 
       <nav className="md:hidden sticky bottom-0 z-40 glass border-t">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = pathname === to || (to !== "/" && pathname.startsWith(to));
             return (
