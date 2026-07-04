@@ -114,6 +114,7 @@ function TutorPage() {
     setInput("");
     const baseMessages: Msg[] = [...messages, { role: "user", content }];
     setMessages(baseMessages);
+    stickToBottomRef.current = true;
     setStreaming(true);
     streamingRef.current = true;
     targetRef.current = "";
