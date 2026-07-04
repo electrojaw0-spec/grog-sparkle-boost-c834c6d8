@@ -52,8 +52,20 @@ function TutorPage() {
   const [liveActive, setLiveActive] = useState<boolean>(false);
   const rafRef = useRef<number | null>(null);
 
+  const stickToBottomRef = useRef<boolean>(true);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottomRef.current = distance < 40;
+  }, []);
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (!stickToBottomRef.current) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages, liveText, streaming]);
 
   useEffect(() => {
@@ -102,6 +114,7 @@ function TutorPage() {
     setInput("");
     const baseMessages: Msg[] = [...messages, { role: "user", content }];
     setMessages(baseMessages);
+    stickToBottomRef.current = true;
     setStreaming(true);
     streamingRef.current = true;
     targetRef.current = "";
@@ -200,7 +213,7 @@ function TutorPage() {
         )}
 
         <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+          <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center px-6">
                 <div className="h-16 w-16 rounded-3xl bg-gradient-gold grid place-items-center glow-gold mb-4">
