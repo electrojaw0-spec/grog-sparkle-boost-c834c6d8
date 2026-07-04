@@ -65,7 +65,7 @@ function TutorPage() {
     if (!stickToBottomRef.current) return;
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, liveText, streaming]);
 
   useEffect(() => {
@@ -79,26 +79,36 @@ function TutorPage() {
   const startTypewriter = useCallback((onDrained: () => void) => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     let displayed = 0;
-    let lastTs = performance.now();
-    const CPS = 90; // baseline chars/sec for smooth typewriter feel
+    let nextAllowedTs = performance.now();
+    // ~33 chars/sec baseline (~30ms/char). Slight extra pauses at punctuation.
+    const MS_PER_CHAR = 30;
+    const PAUSE_AFTER: Record<string, number> = {
+      ",": 120, ";": 140, ":": 120,
+      ".": 220, "!": 220, "?": 220,
+      "\n": 180,
+    };
     const tick = (ts: number) => {
-      const dt = Math.max(0, ts - lastTs) / 1000;
-      lastTs = ts;
       const target = targetRef.current;
-      const remaining = target.length - displayed;
-      if (remaining > 0) {
-        // Adaptive: base rate + catch-up when the buffer runs far ahead
-        const catchUp = Math.floor(remaining / 25);
-        const step = Math.max(1, Math.min(remaining, Math.round(CPS * dt) + catchUp));
-        displayed += step;
-        setLiveText(target.slice(0, displayed));
+      // Advance one char at a time, honoring punctuation pauses.
+      while (displayed < target.length && ts >= nextAllowedTs) {
+        const ch = target[displayed];
+        displayed += 1;
+        // If buffer is very far ahead (network burst), gently catch up
+        // by shortening the per-char delay — never skip characters.
+        const backlog = target.length - displayed;
+        const speedup = backlog > 200 ? 0.35 : backlog > 80 ? 0.6 : 1;
+        const base = MS_PER_CHAR * speedup;
+        const pause = (PAUSE_AFTER[ch] ?? 0) * speedup;
+        nextAllowedTs = ts + base + pause;
       }
+      setLiveText(target.slice(0, displayed));
       if (displayed < targetRef.current.length || streamingRef.current) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         rafRef.current = null;
         onDrained();
       }
+
     };
     rafRef.current = requestAnimationFrame(tick);
   }, []);
