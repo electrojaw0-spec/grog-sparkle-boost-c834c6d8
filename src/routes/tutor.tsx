@@ -222,7 +222,7 @@ function TutorPage() {
           </div>
         )}
 
-        <div className="glass rounded-3xl flex flex-col h-[70vh] overflow-hidden">
+        <div className="glass rounded-3xl flex flex-col h-[calc(100dvh-16rem)] min-h-[420px] md:h-[70vh] overflow-hidden">
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center px-6">
