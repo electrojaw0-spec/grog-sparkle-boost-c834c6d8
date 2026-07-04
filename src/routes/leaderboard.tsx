@@ -27,7 +27,7 @@ function LeaderboardPage() {
   const [first, second, third, ...rest] = TOP;
   return (
     <AppShell>
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-10 pb-24 md:pb-10">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs uppercase tracking-widest mb-4">
             <Trophy className="h-3.5 w-3.5 text-gold" /> This week
