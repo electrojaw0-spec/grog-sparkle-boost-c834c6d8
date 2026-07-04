@@ -52,8 +52,20 @@ function TutorPage() {
   const [liveActive, setLiveActive] = useState<boolean>(false);
   const rafRef = useRef<number | null>(null);
 
+  const stickToBottomRef = useRef<boolean>(true);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottomRef.current = distance < 40;
+  }, []);
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (!stickToBottomRef.current) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages, liveText, streaming]);
 
   useEffect(() => {
