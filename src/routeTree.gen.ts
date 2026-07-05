@@ -14,6 +14,7 @@ import { Route as VersusRouteImport } from './routes/versus'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
@@ -44,6 +45,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -68,6 +74,7 @@ const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/community'
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/community'
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/community'
     | '/leaderboard'
     | '/subjects'
     | '/tutor'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CommunityRoute: typeof CommunityRoute
   LeaderboardRoute: typeof LeaderboardRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -229,6 +249,7 @@ const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CommunityRoute: CommunityRoute,
   LeaderboardRoute: LeaderboardRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
