@@ -13,7 +13,6 @@ import { Route as VersusOnlineRouteImport } from './routes/versus-online'
 import { Route as VersusRouteImport } from './routes/versus'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
-import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,11 +37,6 @@ const TutorRoute = TutorRouteImport.update({
 const SubjectsRoute = SubjectsRouteImport.update({
   id: '/subjects',
   path: '/subjects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeaderboardRoute = LeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -75,7 +69,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
@@ -87,7 +80,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
@@ -100,7 +92,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
@@ -114,7 +105,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
-    | '/leaderboard'
     | '/subjects'
     | '/tutor'
     | '/versus'
@@ -126,7 +116,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
-    | '/leaderboard'
     | '/subjects'
     | '/tutor'
     | '/versus'
@@ -138,7 +127,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
-    | '/leaderboard'
     | '/subjects'
     | '/tutor'
     | '/versus'
@@ -151,7 +139,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   CommunityRoute: typeof CommunityRoute
-  LeaderboardRoute: typeof LeaderboardRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
   VersusRoute: typeof VersusRoute
@@ -187,13 +174,6 @@ declare module '@tanstack/react-router' {
       path: '/subjects'
       fullPath: '/subjects'
       preLoaderRoute: typeof SubjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaderboard': {
-      id: '/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/leaderboard'
-      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -250,7 +230,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CommunityRoute: CommunityRoute,
-  LeaderboardRoute: LeaderboardRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
   VersusRoute: VersusRoute,
