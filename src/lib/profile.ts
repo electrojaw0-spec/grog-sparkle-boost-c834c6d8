@@ -36,12 +36,16 @@ const pending = new Map<string, Promise<Profile | null>>();
 export async function fetchProfile(uid: string): Promise<Profile | null> {
   if (profileCache.has(uid)) return profileCache.get(uid)!;
   if (pending.has(uid)) return pending.get(uid)!;
-  const p = supabase.from("profiles").select("uid, display_name, avatar_id").eq("uid", uid).maybeSingle()
-    .then(({ data }) => {
-      if (data) profileCache.set(uid, data as Profile);
-      pending.delete(uid);
-      return (data as Profile | null) ?? null;
-    });
+  const p: Promise<Profile | null> = (async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("uid, display_name, avatar_id")
+      .eq("uid", uid)
+      .maybeSingle();
+    if (data) profileCache.set(uid, data as Profile);
+    pending.delete(uid);
+    return (data as Profile | null) ?? null;
+  })();
   pending.set(uid, p);
   return p;
 }
