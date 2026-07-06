@@ -48,23 +48,112 @@ export type Database = {
         Row: {
           author_id: string
           author_name: string
-          content: string
+          content: string | null
           created_at: string
           id: string
+          image_path: string | null
         }
         Insert: {
           author_id: string
           author_name: string
-          content: string
+          content?: string | null
           created_at?: string
           id?: string
+          image_path?: string | null
         }
         Update: {
           author_id?: string
           author_name?: string
-          content?: string
+          content?: string | null
           created_at?: string
           id?: string
+          image_path?: string | null
+        }
+        Relationships: []
+      }
+      dm_messages: {
+        Row: {
+          author_id: string
+          content: string | null
+          created_at: string
+          id: string
+          image_path: string | null
+          thread_id: string
+        }
+        Insert: {
+          author_id: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          thread_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "dm_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_threads: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          last_preview: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_preview?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_preview?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_id: number
+          created_at: string
+          display_name: string
+          uid: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_id?: number
+          created_at?: string
+          display_name: string
+          uid: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_id?: number
+          created_at?: string
+          display_name?: string
+          uid?: string
+          updated_at?: string
         }
         Relationships: []
       }

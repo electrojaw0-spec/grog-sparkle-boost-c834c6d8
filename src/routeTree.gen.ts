@@ -13,10 +13,13 @@ import { Route as VersusOnlineRouteImport } from './routes/versus-online'
 import { Route as VersusRouteImport } from './routes/versus'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as SubjectsRouteImport } from './routes/subjects'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as DmsRouteImport } from './routes/dms'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
+import { Route as DmsThreadIdRouteImport } from './routes/dms.$threadId'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
 const VersusOnlineRoute = VersusOnlineRouteImport.update({
@@ -39,6 +42,16 @@ const SubjectsRoute = SubjectsRouteImport.update({
   path: '/subjects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DmsRoute = DmsRouteImport.update({
+  id: '/dms',
+  path: '/dms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
@@ -59,6 +72,11 @@ const SubjectsSubjectIdRoute = SubjectsSubjectIdRouteImport.update({
   path: '/$subjectId',
   getParentRoute: () => SubjectsRoute,
 } as any)
+const DmsThreadIdRoute = DmsThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => DmsRoute,
+} as any)
 const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
   id: '/api/public/chat',
   path: '/api/public/chat',
@@ -69,10 +87,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
+  '/dms': typeof DmsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
   '/versus-online': typeof VersusOnlineRoute
+  '/dms/$threadId': typeof DmsThreadIdRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -80,10 +101,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
+  '/dms': typeof DmsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
   '/versus-online': typeof VersusOnlineRoute
+  '/dms/$threadId': typeof DmsThreadIdRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -92,10 +116,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/community': typeof CommunityRoute
+  '/dms': typeof DmsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/tutor': typeof TutorRoute
   '/versus': typeof VersusRoute
   '/versus-online': typeof VersusOnlineRoute
+  '/dms/$threadId': typeof DmsThreadIdRoute
   '/subjects/$subjectId': typeof SubjectsSubjectIdRoute
   '/api/public/chat': typeof ApiPublicChatRoute
 }
@@ -105,10 +132,13 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
+    | '/dms'
+    | '/profile'
     | '/subjects'
     | '/tutor'
     | '/versus'
     | '/versus-online'
+    | '/dms/$threadId'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesByTo: FileRoutesByTo
@@ -116,10 +146,13 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
+    | '/dms'
+    | '/profile'
     | '/subjects'
     | '/tutor'
     | '/versus'
     | '/versus-online'
+    | '/dms/$threadId'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   id:
@@ -127,10 +160,13 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/community'
+    | '/dms'
+    | '/profile'
     | '/subjects'
     | '/tutor'
     | '/versus'
     | '/versus-online'
+    | '/dms/$threadId'
     | '/subjects/$subjectId'
     | '/api/public/chat'
   fileRoutesById: FileRoutesById
@@ -139,6 +175,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   CommunityRoute: typeof CommunityRoute
+  DmsRoute: typeof DmsRouteWithChildren
+  ProfileRoute: typeof ProfileRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TutorRoute: typeof TutorRoute
   VersusRoute: typeof VersusRoute
@@ -176,6 +214,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dms': {
+      id: '/dms'
+      path: '/dms'
+      fullPath: '/dms'
+      preLoaderRoute: typeof DmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
@@ -204,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsSubjectIdRouteImport
       parentRoute: typeof SubjectsRoute
     }
+    '/dms/$threadId': {
+      id: '/dms/$threadId'
+      path: '/$threadId'
+      fullPath: '/dms/$threadId'
+      preLoaderRoute: typeof DmsThreadIdRouteImport
+      parentRoute: typeof DmsRoute
+    }
     '/api/public/chat': {
       id: '/api/public/chat'
       path: '/api/public/chat'
@@ -213,6 +272,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface DmsRouteChildren {
+  DmsThreadIdRoute: typeof DmsThreadIdRoute
+}
+
+const DmsRouteChildren: DmsRouteChildren = {
+  DmsThreadIdRoute: DmsThreadIdRoute,
+}
+
+const DmsRouteWithChildren = DmsRoute._addFileChildren(DmsRouteChildren)
 
 interface SubjectsRouteChildren {
   SubjectsSubjectIdRoute: typeof SubjectsSubjectIdRoute
@@ -230,6 +299,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CommunityRoute: CommunityRoute,
+  DmsRoute: DmsRouteWithChildren,
+  ProfileRoute: ProfileRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TutorRoute: TutorRoute,
   VersusRoute: VersusRoute,
@@ -239,12 +310,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
