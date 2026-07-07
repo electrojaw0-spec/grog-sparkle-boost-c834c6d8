@@ -262,6 +262,91 @@ function DmsInbox() {
           )}
         </div>
       </div>
+
+      {pickerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
+          onClick={() => setPickerOpen(false)}>
+          <div
+            className="w-full sm:max-w-lg max-h-[85dvh] bg-background border border-border rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 p-4 border-b border-border">
+              <div className="flex-1">
+                <h3 className="font-display text-lg font-bold">Start a new chat</h3>
+                <p className="text-xs text-muted-foreground">Pick a scholar to message privately.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                className="h-9 w-9 grid place-items-center rounded-full bg-secondary hover:bg-secondary/70"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-3 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search scholars…"
+                  className="w-full bg-secondary rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {scholarsLoading && (
+                <div className="grid place-items-center py-10 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              )}
+              {pickerError && (
+                <div className="m-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+                  {pickerError}
+                </div>
+              )}
+              {!scholarsLoading && scholars.length === 0 && !pickerError && (
+                <div className="text-center py-10 text-sm text-muted-foreground px-6">
+                  No other scholars yet — invite a friend or post in the Community first.
+                </div>
+              )}
+              {!scholarsLoading && scholars.length > 0 && (
+                <ul className="divide-y divide-border">
+                  {scholars
+                    .filter((s) =>
+                      query.trim()
+                        ? s.display_name.toLowerCase().includes(query.trim().toLowerCase())
+                        : true,
+                    )
+                    .map((s) => (
+                      <li key={s.uid}>
+                        <button
+                          type="button"
+                          disabled={starting === s.uid}
+                          onClick={() => startChat(s)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors text-left disabled:opacity-60"
+                        >
+                          <UserAvatar avatarId={s.avatar_id} name={s.display_name} size={40} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">{s.display_name}</div>
+                            <div className="text-xs text-muted-foreground">Tap to open chat</div>
+                          </div>
+                          {starting === s.uid ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 text-primary" />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }
