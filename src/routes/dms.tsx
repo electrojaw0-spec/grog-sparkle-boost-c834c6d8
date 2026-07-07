@@ -95,8 +95,6 @@ function DmsInbox() {
     },
     [uid, navigate],
   );
-  const [threads, setThreads] = useState<Thread[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!uid) return;
