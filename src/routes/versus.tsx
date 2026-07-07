@@ -112,6 +112,38 @@ function VersusPage() {
           </p>
         </header>
 
+        {/* MODE PICKER — always visible on setup */}
+        {phase === "setup" && (
+          <div className="grid sm:grid-cols-2 gap-3 mb-5">
+            <div className="rounded-2xl border-2 border-gold bg-gold/10 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Smartphone className="h-5 w-5 text-gold" />
+                <span className="text-xs font-bold uppercase tracking-wider text-gold">Selected</span>
+              </div>
+              <h3 className="font-display text-lg font-bold">Same phone (Offline)</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Two players share one device. Set up below.
+              </p>
+            </div>
+            <Link
+              to="/versus-online"
+              className="group rounded-2xl border border-border bg-gradient-card p-5 hover:border-primary/50 transition-all hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Wifi className="h-5 w-5 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Switch to</span>
+              </div>
+              <h3 className="font-display text-lg font-bold">Online battle</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Play a friend on another phone with a 6‑letter room code.
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                Open online mode <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          </div>
+        )}
+
         {/* SETUP */}
         {phase === "setup" && (
           <div className="rounded-3xl bg-gradient-card border border-border p-6 md:p-8 space-y-5">
