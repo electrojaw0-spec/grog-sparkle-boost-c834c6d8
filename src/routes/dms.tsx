@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProfile, fetchProfile, type Profile } from "@/lib/profile";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { Loader2, MessageSquare, Inbox } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Loader2, MessageSquare, Inbox, Plus, X, Search } from "lucide-react";
 
 export const Route = createFileRoute("/dms")({
   component: DmsInbox,
