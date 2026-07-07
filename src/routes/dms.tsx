@@ -183,10 +183,17 @@ function DmsInbox() {
           <div className="h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
             <MessageSquare className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="font-display text-2xl font-bold">Private chats</h1>
-            <p className="text-xs text-muted-foreground">1‑to‑1 conversations. Tap any Community user's avatar to start one.</p>
+            <p className="text-xs text-muted-foreground">Message any scholar 1‑to‑1. Text, images, all private.</p>
           </div>
+          <button
+            type="button"
+            onClick={openPicker}
+            className="shrink-0 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
+          >
+            <Plus className="h-4 w-4" /> New chat
+          </button>
         </div>
 
         <div className="glass rounded-3xl overflow-hidden">
@@ -201,14 +208,23 @@ function DmsInbox() {
               <Inbox className="h-10 w-10 text-muted-foreground mb-3" />
               <h2 className="font-display text-xl font-semibold">No conversations yet</h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-                Head to the Community, tap another scholar's avatar or name, and send them a private message.
+                Tap <b>New chat</b> to pick a scholar and start typing — or open the Community and DM someone from there.
               </p>
-              <Link
-                to="/community"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
-              >
-                Go to Community
-              </Link>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={openPicker}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
+                >
+                  <Plus className="h-4 w-4" /> Start new chat
+                </button>
+                <Link
+                  to="/community"
+                  className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold hover:bg-secondary transition-colors"
+                >
+                  Browse Community
+                </Link>
+              </div>
             </div>
           )}
 
