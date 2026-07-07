@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProfile, fetchProfile, type Profile } from "@/lib/profile";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { Loader2, MessageSquare, Inbox } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Loader2, MessageSquare, Inbox, Plus, X, Search } from "lucide-react";
 
 export const Route = createFileRoute("/dms")({
   component: DmsInbox,
@@ -37,8 +37,64 @@ function formatWhen(iso: string) {
 
 function DmsInbox() {
   const { uid, profile, loading: profileLoading, save } = useProfile();
+  const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [scholars, setScholars] = useState<Profile[]>([]);
+  const [scholarsLoading, setScholarsLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [starting, setStarting] = useState<string | null>(null);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+
+  const openPicker = useCallback(async () => {
+    setPickerOpen(true);
+    setPickerError(null);
+    if (scholars.length > 0) return;
+    setScholarsLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("uid, display_name, avatar_id")
+      .neq("uid", uid)
+      .order("updated_at", { ascending: false })
+      .limit(200);
+    if (error) setPickerError(error.message);
+    else setScholars((data ?? []) as Profile[]);
+    setScholarsLoading(false);
+  }, [uid, scholars.length]);
+
+  const startChat = useCallback(
+    async (other: Profile) => {
+      if (!uid || other.uid === uid) return;
+      setStarting(other.uid);
+      setPickerError(null);
+      const [a, b] = [uid, other.uid].sort();
+      const { data: existing } = await supabase
+        .from("dm_threads")
+        .select("id")
+        .eq("user_a", a)
+        .eq("user_b", b)
+        .maybeSingle();
+      let threadId = existing?.id;
+      if (!threadId) {
+        const { data: created, error } = await supabase
+          .from("dm_threads")
+          .insert({ user_a: a, user_b: b })
+          .select("id")
+          .single();
+        if (error || !created) {
+          setPickerError(error?.message ?? "Could not start conversation");
+          setStarting(null);
+          return;
+        }
+        threadId = created.id;
+      }
+      setStarting(null);
+      setPickerOpen(false);
+      navigate({ to: "/dms/$threadId", params: { threadId } });
+    },
+    [uid, navigate],
+  );
 
   useEffect(() => {
     if (!uid) return;
@@ -127,10 +183,17 @@ function DmsInbox() {
           <div className="h-12 w-12 rounded-2xl bg-gradient-primary grid place-items-center glow">
             <MessageSquare className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="font-display text-2xl font-bold">Private chats</h1>
-            <p className="text-xs text-muted-foreground">1‑to‑1 conversations. Tap any Community user's avatar to start one.</p>
+            <p className="text-xs text-muted-foreground">Message any scholar 1‑to‑1. Text, images, all private.</p>
           </div>
+          <button
+            type="button"
+            onClick={openPicker}
+            className="shrink-0 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
+          >
+            <Plus className="h-4 w-4" /> New chat
+          </button>
         </div>
 
         <div className="glass rounded-3xl overflow-hidden">
@@ -145,14 +208,23 @@ function DmsInbox() {
               <Inbox className="h-10 w-10 text-muted-foreground mb-3" />
               <h2 className="font-display text-xl font-semibold">No conversations yet</h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-                Head to the Community, tap another scholar's avatar or name, and send them a private message.
+                Tap <b>New chat</b> to pick a scholar and start typing — or open the Community and DM someone from there.
               </p>
-              <Link
-                to="/community"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
-              >
-                Go to Community
-              </Link>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={openPicker}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
+                >
+                  <Plus className="h-4 w-4" /> Start new chat
+                </button>
+                <Link
+                  to="/community"
+                  className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold hover:bg-secondary transition-colors"
+                >
+                  Browse Community
+                </Link>
+              </div>
             </div>
           )}
 
@@ -190,6 +262,91 @@ function DmsInbox() {
           )}
         </div>
       </div>
+
+      {pickerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
+          onClick={() => setPickerOpen(false)}>
+          <div
+            className="w-full sm:max-w-lg max-h-[85dvh] bg-background border border-border rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 p-4 border-b border-border">
+              <div className="flex-1">
+                <h3 className="font-display text-lg font-bold">Start a new chat</h3>
+                <p className="text-xs text-muted-foreground">Pick a scholar to message privately.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                className="h-9 w-9 grid place-items-center rounded-full bg-secondary hover:bg-secondary/70"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-3 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search scholars…"
+                  className="w-full bg-secondary rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {scholarsLoading && (
+                <div className="grid place-items-center py-10 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              )}
+              {pickerError && (
+                <div className="m-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+                  {pickerError}
+                </div>
+              )}
+              {!scholarsLoading && scholars.length === 0 && !pickerError && (
+                <div className="text-center py-10 text-sm text-muted-foreground px-6">
+                  No other scholars yet — invite a friend or post in the Community first.
+                </div>
+              )}
+              {!scholarsLoading && scholars.length > 0 && (
+                <ul className="divide-y divide-border">
+                  {scholars
+                    .filter((s) =>
+                      query.trim()
+                        ? s.display_name.toLowerCase().includes(query.trim().toLowerCase())
+                        : true,
+                    )
+                    .map((s) => (
+                      <li key={s.uid}>
+                        <button
+                          type="button"
+                          disabled={starting === s.uid}
+                          onClick={() => startChat(s)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors text-left disabled:opacity-60"
+                        >
+                          <UserAvatar avatarId={s.avatar_id} name={s.display_name} size={40} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">{s.display_name}</div>
+                            <div className="text-xs text-muted-foreground">Tap to open chat</div>
+                          </div>
+                          {starting === s.uid ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 text-primary" />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

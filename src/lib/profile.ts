@@ -1,7 +1,58 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const AVATAR_COUNT = 100;
+// Career-focused emoji avatars, 20 male/female pairs = 40 avatars.
+// Ordering keeps each pair together (odd = male, even = female).
+export interface AvatarDef {
+  emoji: string;
+  label: string;
+  bg: string; // solid CSS colour behind the emoji
+}
+
+export const AVATARS: AvatarDef[] = [
+  { emoji: "👨‍⚕️", label: "Doctor", bg: "#fecaca" },
+  { emoji: "👩‍⚕️", label: "Doctor", bg: "#fbcfe8" },
+  { emoji: "👨‍⚕️", label: "Nurse", bg: "#a5f3fc" },
+  { emoji: "👩‍⚕️", label: "Nurse", bg: "#bae6fd" },
+  { emoji: "👨‍🎓", label: "Student", bg: "#bfdbfe" },
+  { emoji: "👩‍🎓", label: "Student", bg: "#c7d2fe" },
+  { emoji: "👨‍🏫", label: "Teacher", bg: "#fde68a" },
+  { emoji: "👩‍🏫", label: "Teacher", bg: "#fcd34d" },
+  { emoji: "👨‍💼", label: "Banker", bg: "#e0e7ff" },
+  { emoji: "👩‍💼", label: "Banker", bg: "#ddd6fe" },
+  { emoji: "👨‍🔧", label: "Engineer", bg: "#e5e7eb" },
+  { emoji: "👩‍🔧", label: "Engineer", bg: "#d1d5db" },
+  { emoji: "👷‍♂️", label: "Builder", bg: "#fed7aa" },
+  { emoji: "👷‍♀️", label: "Builder", bg: "#fdba74" },
+  { emoji: "👨‍🔬", label: "Scientist", bg: "#bbf7d0" },
+  { emoji: "👩‍🔬", label: "Scientist", bg: "#a7f3d0" },
+  { emoji: "👨‍💻", label: "Coder", bg: "#e9d5ff" },
+  { emoji: "👩‍💻", label: "Coder", bg: "#d8b4fe" },
+  { emoji: "👨‍✈️", label: "Pilot", bg: "#cffafe" },
+  { emoji: "👩‍✈️", label: "Pilot", bg: "#a5f3fc" },
+  { emoji: "👨‍🚀", label: "Astronaut", bg: "#c7d2fe" },
+  { emoji: "👩‍🚀", label: "Astronaut", bg: "#a5b4fc" },
+  { emoji: "👨‍🚒", label: "Firefighter", bg: "#fecaca" },
+  { emoji: "👩‍🚒", label: "Firefighter", bg: "#fca5a5" },
+  { emoji: "👮‍♂️", label: "Police", bg: "#bfdbfe" },
+  { emoji: "👮‍♀️", label: "Police", bg: "#93c5fd" },
+  { emoji: "👨‍🌾", label: "Farmer", bg: "#d9f99d" },
+  { emoji: "👩‍🌾", label: "Farmer", bg: "#bef264" },
+  { emoji: "👨‍🍳", label: "Chef", bg: "#fef3c7" },
+  { emoji: "👩‍🍳", label: "Chef", bg: "#fde68a" },
+  { emoji: "👨‍⚖️", label: "Lawyer", bg: "#d1d5db" },
+  { emoji: "👩‍⚖️", label: "Lawyer", bg: "#9ca3af" },
+  { emoji: "👨‍🎨", label: "Artist", bg: "#fbcfe8" },
+  { emoji: "👩‍🎨", label: "Artist", bg: "#f9a8d4" },
+  { emoji: "👨‍🎤", label: "Musician", bg: "#ddd6fe" },
+  { emoji: "👩‍🎤", label: "Musician", bg: "#c4b5fd" },
+  { emoji: "🕵️‍♂️", label: "Detective", bg: "#d4d4d8" },
+  { emoji: "🕵️‍♀️", label: "Detective", bg: "#a1a1aa" },
+  { emoji: "👨‍🏭", label: "Technician", bg: "#fed7aa" },
+  { emoji: "👩‍🏭", label: "Technician", bg: "#fdba74" },
+];
+
+export const AVATAR_COUNT = AVATARS.length;
 const UID_KEY = "scholly_community_uid";
 const NAME_KEY = "scholly_community_name";
 const AVATAR_KEY = "scholly_avatar_id";
@@ -22,14 +73,13 @@ export function ensureUid(): string {
   return uid;
 }
 
-// Deterministic colorful avatars (100 unique). No auth, browser-cached SVGs.
-export function avatarUrl(id: number): string {
-  const seed = `scholly-${((id % AVATAR_COUNT) + AVATAR_COUNT) % AVATAR_COUNT || AVATAR_COUNT}`;
-  const bg = "b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,d8f3dc,fdf7c3,ffe5d9";
-  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bg}&backgroundType=gradientLinear&radius=50`;
+// Wrap any avatar id (including legacy 1..100 values) into the current set.
+export function getAvatar(id: number | null | undefined): AvatarDef {
+  const n = typeof id === "number" && id > 0 ? id : 1;
+  const idx = ((n - 1) % AVATAR_COUNT + AVATAR_COUNT) % AVATAR_COUNT;
+  return AVATARS[idx];
 }
 
-// Cache of uid -> profile (reduces refetches when rendering many messages).
 const profileCache = new Map<string, Profile>();
 const pending = new Map<string, Promise<Profile | null>>();
 
@@ -67,7 +117,6 @@ export function useProfile() {
       if (remote) {
         setProfile(remote);
       } else {
-        // Migrate any legacy localStorage-only profile.
         const legacyName = localStorage.getItem(NAME_KEY);
         const legacyAvatar = Number(localStorage.getItem(AVATAR_KEY) || 0);
         if (legacyName) {
