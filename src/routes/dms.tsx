@@ -37,6 +37,64 @@ function formatWhen(iso: string) {
 
 function DmsInbox() {
   const { uid, profile, loading: profileLoading, save } = useProfile();
+  const navigate = useNavigate();
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [scholars, setScholars] = useState<Profile[]>([]);
+  const [scholarsLoading, setScholarsLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [starting, setStarting] = useState<string | null>(null);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+
+  const openPicker = useCallback(async () => {
+    setPickerOpen(true);
+    setPickerError(null);
+    if (scholars.length > 0) return;
+    setScholarsLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("uid, display_name, avatar_id")
+      .neq("uid", uid)
+      .order("updated_at", { ascending: false })
+      .limit(200);
+    if (error) setPickerError(error.message);
+    else setScholars((data ?? []) as Profile[]);
+    setScholarsLoading(false);
+  }, [uid, scholars.length]);
+
+  const startChat = useCallback(
+    async (other: Profile) => {
+      if (!uid || other.uid === uid) return;
+      setStarting(other.uid);
+      setPickerError(null);
+      const [a, b] = [uid, other.uid].sort();
+      const { data: existing } = await supabase
+        .from("dm_threads")
+        .select("id")
+        .eq("user_a", a)
+        .eq("user_b", b)
+        .maybeSingle();
+      let threadId = existing?.id;
+      if (!threadId) {
+        const { data: created, error } = await supabase
+          .from("dm_threads")
+          .insert({ user_a: a, user_b: b })
+          .select("id")
+          .single();
+        if (error || !created) {
+          setPickerError(error?.message ?? "Could not start conversation");
+          setStarting(null);
+          return;
+        }
+        threadId = created.id;
+      }
+      setStarting(null);
+      setPickerOpen(false);
+      navigate({ to: "/dms/$threadId", params: { threadId } });
+    },
+    [uid, navigate],
+  );
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
 
