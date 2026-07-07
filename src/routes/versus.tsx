@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
 import { QUESTIONS, type Question } from "@/lib/questions";
-import { Swords, Trophy, RotateCcw, ChevronRight, Crown } from "lucide-react";
+import { Swords, Trophy, RotateCcw, ChevronRight, Crown, Wifi, Smartphone, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/versus")({
   component: VersusPage,
