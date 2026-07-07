@@ -60,6 +60,22 @@ const ACTIONS = [
     to: "/versus-online",
     cta: "Play online",
   },
+  {
+    n: 6,
+    icon: Users,
+    title: "Join the Community",
+    desc: "Chat with other scholars, ask for help, share ideas and study tips together.",
+    to: "/community",
+    cta: "Open Community",
+  },
+  {
+    n: 7,
+    icon: Mail,
+    title: "Private chats",
+    desc: "Message any scholar 1‑to‑1 — share images, ask for help, and study together.",
+    to: "/dms",
+    cta: "Open Chats",
+  },
 ] as const;
 
 function HomePage() {
