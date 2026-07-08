@@ -44,115 +44,129 @@ export type Database = {
         }
         Relationships: []
       }
-      community_messages: {
+      post_comments: {
         Row: {
           author_id: string
-          author_name: string
-          content: string | null
+          content: string
           created_at: string
           id: string
-          image_path: string | null
+          post_id: string
+          updated_at: string
         }
         Insert: {
           author_id: string
-          author_name: string
-          content?: string | null
+          content: string
           created_at?: string
           id?: string
-          image_path?: string | null
+          post_id: string
+          updated_at?: string
         }
         Update: {
           author_id?: string
-          author_name?: string
-          content?: string | null
+          content?: string
           created_at?: string
           id?: string
-          image_path?: string | null
-        }
-        Relationships: []
-      }
-      dm_messages: {
-        Row: {
-          author_id: string
-          content: string | null
-          created_at: string
-          id: string
-          image_path: string | null
-          thread_id: string
-        }
-        Insert: {
-          author_id: string
-          content?: string | null
-          created_at?: string
-          id?: string
-          image_path?: string | null
-          thread_id: string
-        }
-        Update: {
-          author_id?: string
-          content?: string | null
-          created_at?: string
-          id?: string
-          image_path?: string | null
-          thread_id?: string
+          post_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "dm_messages_thread_id_fkey"
-            columns: ["thread_id"]
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "dm_threads"
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
         ]
       }
-      dm_threads: {
+      post_likes: {
         Row: {
           created_at: string
-          id: string
-          last_message_at: string
-          last_preview: string | null
-          user_a: string
-          user_b: string
+          post_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          last_message_at?: string
-          last_preview?: string | null
-          user_a: string
-          user_b: string
+          post_id: string
+          user_id: string
         }
         Update: {
           created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          comment_count: number
+          content: string | null
+          created_at: string
+          id: string
+          image_path: string | null
+          like_count: number
+          subject_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          comment_count?: number
+          content?: string | null
+          created_at?: string
           id?: string
-          last_message_at?: string
-          last_preview?: string | null
-          user_a?: string
-          user_b?: string
+          image_path?: string | null
+          like_count?: number
+          subject_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          comment_count?: number
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          like_count?: number
+          subject_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
           avatar_id: number
+          course: string | null
           created_at: string
           display_name: string
-          uid: string
+          id: string
+          school: string | null
           updated_at: string
         }
         Insert: {
           avatar_id?: number
+          course?: string | null
           created_at?: string
-          display_name: string
-          uid: string
+          display_name?: string
+          id: string
+          school?: string | null
           updated_at?: string
         }
         Update: {
           avatar_id?: number
+          course?: string | null
           created_at?: string
           display_name?: string
-          uid?: string
+          id?: string
+          school?: string | null
           updated_at?: string
         }
         Relationships: []
