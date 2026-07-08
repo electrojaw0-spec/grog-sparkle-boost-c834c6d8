@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { InstallButton } from "@/components/InstallButton";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, MessageCircle, Users, Mail } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, MessageCircle, Users } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 
@@ -64,17 +64,9 @@ const ACTIONS = [
     n: 6,
     icon: Users,
     title: "Join the Community",
-    desc: "Chat with other scholars, ask for help, share ideas and study tips together.",
+    desc: "Post questions, share notes and study images, like and comment with other scholars.",
     to: "/community",
     cta: "Open Community",
-  },
-  {
-    n: 7,
-    icon: Mail,
-    title: "Private chats",
-    desc: "Message any scholar 1‑to‑1 — share images, ask for help, and study together.",
-    to: "/dms",
-    cta: "Open Chats",
   },
 ] as const;
 

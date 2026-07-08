@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
-// Career-focused emoji avatars, 20 male/female pairs = 40 avatars.
-// Ordering keeps each pair together (odd = male, even = female).
+// Career-focused emoji avatars — 20 male/female pairs = 40 avatars.
 export interface AvatarDef {
   emoji: string;
   label: string;
-  bg: string; // solid CSS colour behind the emoji
+  bg: string;
 }
 
 export const AVATARS: AvatarDef[] = [
@@ -53,94 +53,108 @@ export const AVATARS: AvatarDef[] = [
 ];
 
 export const AVATAR_COUNT = AVATARS.length;
-const UID_KEY = "scholly_community_uid";
-const NAME_KEY = "scholly_community_name";
-const AVATAR_KEY = "scholly_avatar_id";
 
-export interface Profile {
-  uid: string;
-  display_name: string;
-  avatar_id: number;
-}
-
-export function ensureUid(): string {
-  if (typeof window === "undefined") return "";
-  let uid = localStorage.getItem(UID_KEY);
-  if (!uid) {
-    uid = crypto.randomUUID();
-    localStorage.setItem(UID_KEY, uid);
-  }
-  return uid;
-}
-
-// Wrap any avatar id (including legacy 1..100 values) into the current set.
 export function getAvatar(id: number | null | undefined): AvatarDef {
   const n = typeof id === "number" && id > 0 ? id : 1;
   const idx = ((n - 1) % AVATAR_COUNT + AVATAR_COUNT) % AVATAR_COUNT;
   return AVATARS[idx];
 }
 
+export interface Profile {
+  id: string;
+  display_name: string;
+  avatar_id: number;
+  school: string | null;
+  course: string | null;
+}
+
 const profileCache = new Map<string, Profile>();
 const pending = new Map<string, Promise<Profile | null>>();
 
-export async function fetchProfile(uid: string): Promise<Profile | null> {
-  if (profileCache.has(uid)) return profileCache.get(uid)!;
-  if (pending.has(uid)) return pending.get(uid)!;
+export async function fetchProfile(id: string): Promise<Profile | null> {
+  if (profileCache.has(id)) return profileCache.get(id)!;
+  if (pending.has(id)) return pending.get(id)!;
   const p: Promise<Profile | null> = (async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("uid, display_name, avatar_id")
-      .eq("uid", uid)
+      .select("id, display_name, avatar_id, school, course")
+      .eq("id", id)
       .maybeSingle();
-    if (data) profileCache.set(uid, data as Profile);
-    pending.delete(uid);
+    if (data) profileCache.set(id, data as Profile);
+    pending.delete(id);
     return (data as Profile | null) ?? null;
   })();
-  pending.set(uid, p);
+  pending.set(id, p);
   return p;
 }
 
 export function primeProfile(p: Profile) {
-  profileCache.set(p.uid, p);
+  profileCache.set(p.id, p);
 }
 
-export function useProfile() {
-  const [uid, setUid] = useState("");
+export function useSession() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setUser(data.session?.user ?? null);
+      setLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+  return { user, loading };
+}
+
+export function useMyProfile() {
+  const { user, loading: sessionLoading } = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const u = ensureUid();
-    setUid(u);
+    if (sessionLoading) return;
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
     (async () => {
-      const remote = await fetchProfile(u);
-      if (remote) {
-        setProfile(remote);
-      } else {
-        const legacyName = localStorage.getItem(NAME_KEY);
-        const legacyAvatar = Number(localStorage.getItem(AVATAR_KEY) || 0);
-        if (legacyName) {
-          setProfile({ uid: u, display_name: legacyName, avatar_id: legacyAvatar || 1 });
-        }
-      }
+      const p = await fetchProfile(user.id);
+      if (cancelled) return;
+      setProfile(p);
       setLoading(false);
     })();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [user, sessionLoading]);
 
   const save = useCallback(
-    async (data: { display_name: string; avatar_id: number }): Promise<Profile> => {
-      const u = uid || ensureUid();
-      const row = { uid: u, display_name: data.display_name.trim().slice(0, 40), avatar_id: data.avatar_id };
-      const { error } = await supabase.from("profiles").upsert(row, { onConflict: "uid" });
+    async (data: { display_name: string; avatar_id: number; school?: string | null; course?: string | null }): Promise<Profile> => {
+      if (!user) throw new Error("Not signed in");
+      const row = {
+        id: user.id,
+        display_name: data.display_name.trim().slice(0, 40) || "Scholar",
+        avatar_id: data.avatar_id,
+        school: data.school?.trim() || null,
+        course: data.course?.trim() || null,
+      };
+      const { error } = await supabase.from("profiles").upsert(row, { onConflict: "id" });
       if (error) throw error;
-      localStorage.setItem(NAME_KEY, row.display_name);
-      localStorage.setItem(AVATAR_KEY, String(row.avatar_id));
-      profileCache.set(u, row);
+      profileCache.set(user.id, row);
       setProfile(row);
       return row;
     },
-    [uid],
+    [user],
   );
 
-  return { uid, profile, loading, save, setProfile };
+  return { user, profile, loading: loading || sessionLoading, save };
 }
