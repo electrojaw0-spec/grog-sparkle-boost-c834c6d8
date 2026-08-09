@@ -6,7 +6,7 @@ import { useMyProfile } from "@/lib/profile";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, LogOut } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/profile")({
+export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   head: () => ({
     meta: [

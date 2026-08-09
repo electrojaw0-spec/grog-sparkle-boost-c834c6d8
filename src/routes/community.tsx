@@ -20,7 +20,7 @@ import {
   Tag,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/community")({
+export const Route = createFileRoute("/community")({
   component: CommunityPage,
   head: () => ({
     meta: [

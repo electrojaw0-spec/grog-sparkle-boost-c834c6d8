@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
 
 // Career-focused emoji avatars — 20 male/female pairs = 40 avatars.
 export interface AvatarDef {
