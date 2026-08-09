@@ -1,5 +1,4 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users } from "lucide-react";
 import schollyLogo from "@/assets/scholly-logo.png";
 import { useMyProfile } from "@/lib/profile";
@@ -16,13 +15,6 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const { profile } = useMyProfile();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const close = () => setMenuOpen(false);
-    if (menuOpen) window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, [menuOpen]);
 
 
   return (
