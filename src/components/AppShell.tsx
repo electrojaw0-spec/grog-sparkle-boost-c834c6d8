@@ -1,8 +1,6 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users, LogIn, LogOut } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users } from "lucide-react";
 import schollyLogo from "@/assets/scholly-logo.png";
-import { supabase } from "@/integrations/supabase/client";
 import { useMyProfile } from "@/lib/profile";
 import { UserAvatar } from "@/components/UserAvatar";
 
@@ -16,20 +14,8 @@ const NAV = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { user, profile } = useMyProfile();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { profile } = useMyProfile();
 
-  useEffect(() => {
-    const close = () => setMenuOpen(false);
-    if (menuOpen) window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, [menuOpen]);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/", replace: true });
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -61,44 +47,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {user ? (
-            <div className="relative" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setMenuOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-secondary"
-                aria-label="Open account menu"
-              >
-                <UserAvatar avatarId={profile?.avatar_id ?? 1} name={profile?.display_name} size={32} />
-                <span className="hidden sm:inline text-xs font-semibold max-w-[100px] truncate">
-                  {profile?.display_name ?? "Scholar"}
-                </span>
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl glass border border-border p-1 z-50">
-                  <Link
-                    to="/profile"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <UserAvatar avatarId={profile?.avatar_id ?? 1} size={20} /> Profile
-                  </Link>
-                  <button
-                    onClick={signOut}
-                    className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary text-left"
-                  >
-                    <LogOut className="h-4 w-4" /> Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              to="/auth"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
-            >
-              <LogIn className="h-4 w-4" /> Sign in
-            </Link>
-          )}
+          <Link
+            to="/profile"
+            className="flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-secondary"
+            aria-label="Open your profile"
+          >
+            <UserAvatar avatarId={profile?.avatar_id ?? 1} name={profile?.display_name} size={32} />
+            <span className="hidden sm:inline text-xs font-semibold max-w-[100px] truncate">
+              {profile?.display_name ?? "Scholar"}
+            </span>
+          </Link>
+
         </div>
       </header>
 

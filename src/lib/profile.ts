@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
 
 // Career-focused emoji avatars — 20 male/female pairs = 40 avatars.
 export interface AvatarDef {
@@ -92,42 +91,71 @@ export function primeProfile(p: Profile) {
   profileCache.set(p.id, p);
 }
 
+const GUEST_KEY = "scholly.guest.v1";
+
+interface GuestIdentity {
+  id: string;
+  display_name: string;
+  avatar_id: number;
+}
+
+function randomName() {
+  return `Scholar${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+/** Browser-only. Returns the persistent device identity, creating it on first call. */
+export function getGuest(): GuestIdentity {
+  const raw = localStorage.getItem(GUEST_KEY);
+  if (raw) {
+    try {
+      const g = JSON.parse(raw) as GuestIdentity;
+      if (g?.id) return g;
+    } catch {
+      /* fall through */
+    }
+  }
+  const g: GuestIdentity = {
+    id: crypto.randomUUID(),
+    display_name: randomName(),
+    avatar_id: 1 + Math.floor(Math.random() * AVATAR_COUNT),
+  };
+  localStorage.setItem(GUEST_KEY, JSON.stringify(g));
+  return g;
+}
+
+function saveGuest(g: GuestIdentity) {
+  localStorage.setItem(GUEST_KEY, JSON.stringify(g));
+}
+
+/** Kept for API compatibility: everyone is a guest "user" identified by device. */
 export function useSession() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
+    const g = getGuest();
+    setUser({ id: g.id });
+    setLoading(false);
   }, []);
   return { user, loading };
 }
 
 export function useMyProfile() {
-  const { user, loading: sessionLoading } = useSession();
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (sessionLoading) return;
-    if (!user) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
     (async () => {
-      const p = await fetchProfile(user.id);
+      const g = getGuest();
+      if (cancelled) return;
+      setUser({ id: g.id });
+      let p = await fetchProfile(g.id);
+      if (!p) {
+        p = { id: g.id, display_name: g.display_name, avatar_id: g.avatar_id, school: null, course: null };
+        await supabase.from("profiles").upsert(p, { onConflict: "id" });
+        profileCache.set(p.id, p);
+      }
       if (cancelled) return;
       setProfile(p);
       setLoading(false);
@@ -135,13 +163,18 @@ export function useMyProfile() {
     return () => {
       cancelled = true;
     };
-  }, [user, sessionLoading]);
+  }, []);
 
   const save = useCallback(
-    async (data: { display_name: string; avatar_id: number; school?: string | null; course?: string | null }): Promise<Profile> => {
-      if (!user) throw new Error("Not signed in");
-      const row = {
-        id: user.id,
+    async (data: {
+      display_name: string;
+      avatar_id: number;
+      school?: string | null;
+      course?: string | null;
+    }): Promise<Profile> => {
+      const g = getGuest();
+      const row: Profile = {
+        id: g.id,
         display_name: data.display_name.trim().slice(0, 40) || "Scholar",
         avatar_id: data.avatar_id,
         school: data.school?.trim() || null,
@@ -149,12 +182,14 @@ export function useMyProfile() {
       };
       const { error } = await supabase.from("profiles").upsert(row, { onConflict: "id" });
       if (error) throw error;
-      profileCache.set(user.id, row);
+      saveGuest({ id: row.id, display_name: row.display_name, avatar_id: row.avatar_id });
+      profileCache.set(row.id, row);
       setProfile(row);
       return row;
     },
-    [user],
+    [],
   );
 
-  return { user, profile, loading: loading || sessionLoading, save };
+  return { user, profile, loading, save };
 }
+

@@ -1,12 +1,11 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AvatarPicker } from "@/components/AvatarPicker";
 import { useMyProfile } from "@/lib/profile";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/profile")({
+export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   head: () => ({
     meta: [
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/_authenticated/profile")({
 
 function ProfilePage() {
   const { profile, loading, save } = useMyProfile();
-  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [avatarId, setAvatarId] = useState(1);
   const [school, setSchool] = useState("");
@@ -49,11 +47,6 @@ function ProfilePage() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
   };
 
   if (loading) {
@@ -132,13 +125,6 @@ function ProfilePage() {
             >
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               Save profile
-            </button>
-            <button
-              type="button"
-              onClick={signOut}
-              className="rounded-xl bg-secondary px-4 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" /> Sign out
             </button>
           </div>
         </form>
