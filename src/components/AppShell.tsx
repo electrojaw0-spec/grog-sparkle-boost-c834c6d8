@@ -1,8 +1,7 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users, LogIn, LogOut } from "lucide-react";
+import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users } from "lucide-react";
 import schollyLogo from "@/assets/scholly-logo.png";
-import { supabase } from "@/integrations/supabase/client";
 import { useMyProfile } from "@/lib/profile";
 import { UserAvatar } from "@/components/UserAvatar";
 
@@ -16,8 +15,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { user, profile } = useMyProfile();
+  const { profile } = useMyProfile();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -26,10 +24,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("click", close);
   }, [menuOpen]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/", replace: true });
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
