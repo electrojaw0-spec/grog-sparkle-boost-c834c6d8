@@ -44,6 +44,10 @@ function TutorPage() {
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullPaywall, setShowFullPaywall] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Typewriter: target holds the full accumulated stream; liveText is what's shown.
@@ -114,16 +118,21 @@ function TutorPage() {
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
-  const send = useCallback(async (text?: string) => {
+  const send = useCallback(async (text?: string, imageOverride?: string | null) => {
     const content = (text ?? input).trim();
-    if (!content || streaming) return;
+    const image = imageOverride !== undefined ? imageOverride : pendingImage;
+    if ((!content && !image) || streaming) return;
     if (!access.hasAccess && freeUsed >= FREE_LIMIT) {
       setShowFullPaywall(true);
       return;
     }
     setError(null);
     setInput("");
-    const baseMessages: Msg[] = [...messages, { role: "user", content }];
+    setPendingImage(null);
+    const userMsg: Msg = image
+      ? { role: "user", content: content || "Please solve/explain the question in this photo.", image }
+      : { role: "user", content };
+    const baseMessages: Msg[] = [...messages, userMsg];
     setMessages(baseMessages);
     stickToBottomRef.current = true;
     setStreaming(true);
@@ -147,10 +156,21 @@ function TutorPage() {
     });
 
     try {
+      const payload = baseMessages.map((m) =>
+        m.image
+          ? {
+              role: m.role,
+              content: [
+                { type: "text", text: m.content },
+                { type: "image_url", image_url: { url: m.image } },
+              ],
+            }
+          : { role: m.role, content: m.content }
+      );
       const res = await fetch("/api/public/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: baseMessages }),
+        body: JSON.stringify({ messages: payload }),
       });
       if (!res.ok || !res.body) {
         const body = await res.text().catch(() => "");
