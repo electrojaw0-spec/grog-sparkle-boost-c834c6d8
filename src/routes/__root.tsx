@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
+import { registerServiceWorker } from "@/lib/registerSW";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
