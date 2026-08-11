@@ -21,6 +21,7 @@ export function InstallButton({ className = "" }: { className?: string }) {
     const ua = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(ua);
     setIsIos(ios);
+    setIsDesktop(!/android|iphone|ipad|ipod|mobile/.test(ua));
 
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
