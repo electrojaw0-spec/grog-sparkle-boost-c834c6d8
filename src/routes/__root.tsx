@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
+import { registerServiceWorker } from "@/lib/registerSW";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -32,6 +34,11 @@ export const Route = createRootRoute({
       { title: "Scholly.AI — Your AI WAEC Study Companion" },
       { name: "description", content: "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE." },
       { name: "author", content: "Scholly.AI" },
+      { name: "theme-color", content: "#0F172A" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Scholly" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { property: "og:title", content: "Scholly.AI — Your AI WAEC Study Companion" },
       { property: "og:description", content: "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE." },
       { property: "og:type", content: "website" },
@@ -69,5 +76,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return <Outlet />;
 }

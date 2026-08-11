@@ -1,15 +1,25 @@
 {
+  "id": "/",
   "name": "Scholly.AI — WAEC Study Companion",
   "short_name": "Scholly",
   "description": "AI tutor, past questions, and mock exams to help West African students ace WAEC/WASSCE.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#0F172A",
   "theme_color": "#0F172A",
+  "categories": ["education", "productivity"],
+  "launch_handler": { "client_mode": "focus-existing" },
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "AI Tutor", "url": "/tutor" },
+    { "name": "Subjects", "url": "/subjects" },
+    { "name": "Versus", "url": "/versus" }
   ]
 }

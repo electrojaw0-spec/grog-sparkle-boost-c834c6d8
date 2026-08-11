@@ -14,12 +14,14 @@ export function InstallButton({ className = "" }: { className?: string }) {
   const [installed, setInstalled] = useState(false);
   const [showIos, setShowIos] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [autoPopup, setAutoPopup] = useState(false);
 
   useEffect(() => {
     const ua = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(ua);
     setIsIos(ios);
+    setIsDesktop(!/android|iphone|ipad|ipod|mobile/.test(ua));
 
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -151,6 +153,12 @@ export function InstallButton({ className = "" }: { className?: string }) {
                           <li>Choose <strong>Add to Home Screen</strong>.</li>
                           <li>Tap <strong>Add</strong> — Scholly opens like a real app.</li>
                         </>
+                      ) : isDesktop ? (
+                        <>
+                          <li>In Chrome or Edge, look for the <strong>install icon</strong> (⊕ or a monitor with an arrow) at the right of the address bar.</li>
+                          <li>Or open the browser menu (⋮) → <strong>Install Scholly</strong> / <strong>Apps → Install this site as an app</strong>.</li>
+                          <li>Confirm — Scholly opens in its own window like a desktop app.</li>
+                        </>
                       ) : (
                         <>
                           <li>Open the browser menu (⋮).</li>
@@ -161,7 +169,9 @@ export function InstallButton({ className = "" }: { className?: string }) {
                     </ol>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Tap install below to add Scholly to your home screen — no app store, no sign-up.
+                      {isDesktop
+                        ? "Click install below to add Scholly to your laptop — it opens in its own window, no app store needed."
+                        : "Tap install below to add Scholly to your home screen — no app store, no sign-up."}
                     </p>
                   )}
                   <div className="mt-5 flex gap-2">
