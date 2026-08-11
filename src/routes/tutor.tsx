@@ -194,7 +194,22 @@ function TutorPage() {
       setStreaming(false);
       streamingRef.current = false;
     }
-  }, [input, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+  }, [input, pendingImage, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+
+  const onPickFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    setPreparing(true);
+    try {
+      setPendingImage(await fileToCompressedDataUrl(file));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not read that image");
+    } finally {
+      setPreparing(false);
+    }
+  }, []);
 
   return (
     <AppShell>
@@ -281,6 +296,13 @@ function TutorPage() {
                     ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
                     : "bg-card border border-border rounded-tl-sm"
                 }`}>
+                  {m.image && (
+                    <img
+                      src={m.image}
+                      alt="Question photo sent to the tutor"
+                      className="mb-2 max-h-60 w-full rounded-xl object-cover"
+                    />
+                  )}
                   {m.content}
                 </div>
               </div>
