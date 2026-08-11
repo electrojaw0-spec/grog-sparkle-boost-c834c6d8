@@ -14,6 +14,7 @@ export function InstallButton({ className = "" }: { className?: string }) {
   const [installed, setInstalled] = useState(false);
   const [showIos, setShowIos] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [autoPopup, setAutoPopup] = useState(false);
 
   useEffect(() => {
