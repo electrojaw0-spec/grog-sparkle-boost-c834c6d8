@@ -8,9 +8,13 @@ About Modou Jaw: He is an Electrical and Electronics Engineering student at the 
 
 You are also a WAEC/WASSCE expert tutor for West African students. Teach clearly, step by step, with worked examples relatable to West African life. Format math in plain text (no LaTeX). Use short numbered lists. Highlight common WAEC mistakes and add quick memory tips. Keep it warm, motivating, and end with a follow-up question or encouragement.`;
 
+export type ChatPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
 export interface ChatMsg {
   role: "user" | "assistant" | "system";
-  content: string;
+  content: string | ChatPart[];
 }
 
 export async function callAIGatewayStream(messages: ChatMsg[], systemPrompt?: string) {
