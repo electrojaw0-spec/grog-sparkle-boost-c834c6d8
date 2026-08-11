@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Sparkles, Bot, User, Loader2, Lock, MessageCircle } from "lucide-react";
+import { Send, Sparkles, Bot, User, Loader2, Lock, ImagePlus, Camera, X } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
+import { fileToCompressedDataUrl } from "@/lib/imageInput";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/tutor")({
   }),
 });
 
-interface Msg { role: "user" | "assistant"; content: string; }
+interface Msg { role: "user" | "assistant"; content: string; image?: string; }
 
 const SUGGESTIONS = [
   "Explain quadratic equations with an example",
@@ -43,6 +44,10 @@ function TutorPage() {
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullPaywall, setShowFullPaywall] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Typewriter: target holds the full accumulated stream; liveText is what's shown.
@@ -113,16 +118,21 @@ function TutorPage() {
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
-  const send = useCallback(async (text?: string) => {
+  const send = useCallback(async (text?: string, imageOverride?: string | null) => {
     const content = (text ?? input).trim();
-    if (!content || streaming) return;
+    const image = imageOverride !== undefined ? imageOverride : pendingImage;
+    if ((!content && !image) || streaming) return;
     if (!access.hasAccess && freeUsed >= FREE_LIMIT) {
       setShowFullPaywall(true);
       return;
     }
     setError(null);
     setInput("");
-    const baseMessages: Msg[] = [...messages, { role: "user", content }];
+    setPendingImage(null);
+    const userMsg: Msg = image
+      ? { role: "user", content: content || "Please solve/explain the question in this photo.", image }
+      : { role: "user", content };
+    const baseMessages: Msg[] = [...messages, userMsg];
     setMessages(baseMessages);
     stickToBottomRef.current = true;
     setStreaming(true);
@@ -146,10 +156,21 @@ function TutorPage() {
     });
 
     try {
+      const payload = baseMessages.map((m) =>
+        m.image
+          ? {
+              role: m.role,
+              content: [
+                { type: "text", text: m.content },
+                { type: "image_url", image_url: { url: m.image } },
+              ],
+            }
+          : { role: m.role, content: m.content }
+      );
       const res = await fetch("/api/public/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: baseMessages }),
+        body: JSON.stringify({ messages: payload }),
       });
       if (!res.ok || !res.body) {
         const body = await res.text().catch(() => "");
@@ -173,7 +194,22 @@ function TutorPage() {
       setStreaming(false);
       streamingRef.current = false;
     }
-  }, [input, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+  }, [input, pendingImage, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+
+  const onPickFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    setPreparing(true);
+    try {
+      setPendingImage(await fileToCompressedDataUrl(file));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not read that image");
+    } finally {
+      setPreparing(false);
+    }
+  }, []);
 
   return (
     <AppShell>
@@ -260,6 +296,13 @@ function TutorPage() {
                     ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
                     : "bg-card border border-border rounded-tl-sm"
                 }`}>
+                  {m.image && (
+                    <img
+                      src={m.image}
+                      alt="Question photo sent to the tutor"
+                      className="mb-2 max-h-60 w-full rounded-xl object-cover"
+                    />
+                  )}
                   {m.content}
                 </div>
               </div>
@@ -317,25 +360,71 @@ function TutorPage() {
           ) : (
             <form
               onSubmit={(e) => { e.preventDefault(); send(); }}
-              className="border-t border-border p-3 md:p-4 flex items-end gap-2"
+              className="border-t border-border p-3 md:p-4"
             >
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-                }}
-                placeholder={freeLeft <= 2 && !access.hasAccess ? `Only ${freeLeft} free message${freeLeft === 1 ? "" : "s"} left…` : "Ask about any WAEC topic…"}
-                rows={1}
-                className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
-              />
-              <button
-                type="submit"
-                disabled={streaming || !input.trim()}
-                className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
-              >
-                {streaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-              </button>
+              <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onPickFile} />
+              <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPickFile} />
+
+              {(pendingImage || preparing) && (
+                <div className="mb-3 flex items-center gap-3 rounded-2xl bg-secondary p-2">
+                  {preparing ? (
+                    <div className="h-16 w-16 rounded-xl bg-card grid place-items-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <img src={pendingImage!} alt="Photo preview" className="h-16 w-16 rounded-xl object-cover" />
+                  )}
+                  <span className="flex-1 text-xs text-muted-foreground">
+                    {preparing ? "Preparing photo…" : "Photo attached — add a question or just send it."}
+                  </span>
+                  {!preparing && (
+                    <button
+                      type="button"
+                      onClick={() => setPendingImage(null)}
+                      aria-label="Remove photo"
+                      className="h-8 w-8 rounded-full bg-card grid place-items-center text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => cameraRef.current?.click()}
+                  aria-label="Take a photo"
+                  className="h-11 w-11 shrink-0 rounded-2xl bg-secondary grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Camera className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => galleryRef.current?.click()}
+                  aria-label="Upload a photo"
+                  className="h-11 w-11 shrink-0 rounded-2xl bg-secondary grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                </button>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                  }}
+                  placeholder={pendingImage ? "Ask about this photo (optional)…" : freeLeft <= 2 && !access.hasAccess ? `Only ${freeLeft} free message${freeLeft === 1 ? "" : "s"} left…` : "Ask about any WAEC topic…"}
+                  rows={1}
+                  className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
+                />
+                <button
+                  type="submit"
+                  disabled={streaming || preparing || (!input.trim() && !pendingImage)}
+                  className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
+                >
+                  {streaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                </button>
+              </div>
             </form>
           )}
         </div>
