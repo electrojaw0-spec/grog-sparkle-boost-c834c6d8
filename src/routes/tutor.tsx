@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Sparkles, Bot, User, Loader2, Lock, MessageCircle } from "lucide-react";
+import { Send, Sparkles, Bot, User, Loader2, Lock, ImagePlus, Camera, X } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
+import { fileToCompressedDataUrl } from "@/lib/imageInput";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/tutor")({
   }),
 });
 
-interface Msg { role: "user" | "assistant"; content: string; }
+interface Msg { role: "user" | "assistant"; content: string; image?: string; }
 
 const SUGGESTIONS = [
   "Explain quadratic equations with an example",
