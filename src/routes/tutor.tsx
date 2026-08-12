@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Sparkles, Bot, User, Loader2, Lock, ImagePlus, Camera, X } from "lucide-react";
+import { Send, Sparkles, Bot, User, Square, Lock, ImagePlus, Camera, X, Loader2 } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 import { fileToCompressedDataUrl } from "@/lib/imageInput";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
@@ -50,6 +50,8 @@ function TutorPage() {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const stoppedRef = useRef(false);
 
   // Typewriter: target holds the full accumulated stream; liveText is what's shown.
   const targetRef = useRef<string>("");
@@ -168,10 +170,14 @@ function TutorPage() {
             }
           : { role: m.role, content: m.content }
       );
+      const controller = new AbortController();
+      abortRef.current = controller;
+      stoppedRef.current = false;
       const res = await fetch("/api/public/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: payload }),
+        signal: controller.signal,
       });
       if (!res.ok || !res.body) {
         const body = await res.text().catch(() => "");
@@ -185,6 +191,12 @@ function TutorPage() {
         targetRef.current += decoder.decode(value, { stream: true });
       }
     } catch (e) {
+      if (stoppedRef.current || (e instanceof DOMException && e.name === "AbortError")) {
+        // Keep whatever was streamed so far; the typewriter drains and commits it.
+        setStreaming(false);
+        streamingRef.current = false;
+        return;
+      }
       const msg = e instanceof Error ? e.message : "Something went wrong";
       setError(msg);
       setLiveActive(false);
@@ -192,10 +204,25 @@ function TutorPage() {
       targetRef.current = "";
       if (rafRef.current != null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     } finally {
+      abortRef.current = null;
       setStreaming(false);
       streamingRef.current = false;
     }
   }, [input, pendingImage, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+
+  const stop = useCallback(() => {
+    stoppedRef.current = true;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    streamingRef.current = false;
+    setStreaming(false);
+    // Freeze the answer at what's already visible so it commits right away.
+    setLiveText((shown) => {
+      targetRef.current = shown;
+      return shown;
+    });
+  }, []);
+
 
   const onPickFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -419,11 +446,13 @@ function TutorPage() {
                   className="flex-1 resize-none bg-secondary rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground max-h-40"
                 />
                 <button
-                  type="submit"
-                  disabled={streaming || preparing || (!input.trim() && !pendingImage)}
+                  type={streaming || liveActive ? "button" : "submit"}
+                  onClick={streaming || liveActive ? stop : undefined}
+                  aria-label={streaming || liveActive ? "Stop response" : "Send message"}
+                  disabled={!(streaming || liveActive) && (preparing || (!input.trim() && !pendingImage))}
                   className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
                 >
-                  {streaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                  {streaming || liveActive ? <Square className="h-4 w-4 fill-current" /> : <Send className="h-5 w-5" />}
                 </button>
               </div>
             </form>

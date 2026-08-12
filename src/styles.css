@@ -101,8 +101,43 @@
 }
 
 .dark {
-  /* same theme — app is permanently dark */
+  --background: oklch(0.17 0.02 265);
+  --foreground: oklch(0.96 0.01 260);
+
+  --card: oklch(0.21 0.025 265);
+  --card-foreground: oklch(0.96 0.01 260);
+
+  --popover: oklch(0.21 0.025 265);
+  --popover-foreground: oklch(0.96 0.01 260);
+
+  --primary: oklch(0.66 0.16 270);
+  --primary-foreground: oklch(0.16 0.02 265);
+
+  --secondary: oklch(0.26 0.025 265);
+  --secondary-foreground: oklch(0.94 0.01 260);
+
+  --muted: oklch(0.26 0.025 265);
+  --muted-foreground: oklch(0.72 0.02 265);
+
+  --accent: oklch(0.30 0.04 268);
+  --accent-foreground: oklch(0.95 0.01 260);
+
+  --gold: oklch(0.80 0.15 78);
+  --gold-foreground: oklch(0.18 0.03 265);
+
+  --destructive: oklch(0.58 0.20 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.96 0.01 260 / 12%);
+  --input: oklch(0.96 0.01 260 / 16%);
+  --ring: oklch(0.66 0.16 270);
+
+  --gradient-hero: linear-gradient(160deg, oklch(0.22 0.04 268) 0%, oklch(0.17 0.02 265) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.58 0.16 265), oklch(0.62 0.16 290));
+  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.14 80), oklch(0.74 0.16 55));
+  --gradient-card: linear-gradient(180deg, oklch(0.23 0.028 265) 0%, oklch(0.19 0.02 265) 100%);
 }
+
 
 @layer base {
   * {

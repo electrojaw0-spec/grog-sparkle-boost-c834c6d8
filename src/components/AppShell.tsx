@@ -3,6 +3,7 @@ import { Sparkles, Home, MessageSquare, BookOpen, Swords, Users } from "lucide-r
 import schollyLogo from "@/assets/scholly-logo.png";
 import { useMyProfile } from "@/lib/profile";
 import { UserAvatar } from "@/components/UserAvatar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -47,6 +48,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
+          <div className="flex items-center gap-1.5">
+          <ThemeToggle />
           <Link
             to="/profile"
             className="flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-secondary"
@@ -57,6 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {profile?.display_name ?? "Scholar"}
             </span>
           </Link>
+          </div>
 
         </div>
       </header>
