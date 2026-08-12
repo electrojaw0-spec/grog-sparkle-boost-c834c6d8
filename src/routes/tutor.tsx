@@ -291,9 +291,9 @@ function TutorPage() {
                     ? <User className="h-4 w-4 text-gold-foreground" />
                     : <Bot className="h-4 w-4 text-primary-foreground" />}
                 </div>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
                   m.role === "user"
-                    ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
+                    ? "bg-gradient-primary text-primary-foreground rounded-tr-sm whitespace-pre-wrap"
                     : "bg-card border border-border rounded-tl-sm"
                 }`}>
                   {m.image && (
@@ -303,7 +303,7 @@ function TutorPage() {
                       className="mb-2 max-h-60 w-full rounded-xl object-cover"
                     />
                   )}
-                  {m.content}
+                  {m.role === "user" ? m.content : <ChatMarkdown text={m.content} />}
                 </div>
               </div>
             ))}
