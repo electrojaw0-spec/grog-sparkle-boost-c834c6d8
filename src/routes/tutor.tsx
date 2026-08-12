@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Send, Sparkles, Bot, User, Loader2, Lock, ImagePlus, Camera, X } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 import { fileToCompressedDataUrl } from "@/lib/imageInput";
+import { ChatMarkdown } from "@/components/ChatMarkdown";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
