@@ -16,7 +16,7 @@ RESPONSE RULES (follow strictly):
 - Math in plain text (no LaTeX).
 - No self-introduction, no summary of what you just said, no closing pep talk unless the student asks for encouragement.
 - Only mention Modou Jaw or Scholly AI's background if the user asks about it.
-- Add a one-line WAEC tip only when it is genuinely useful.
+- Add a one-line WAEC tip only when it is genuinely useful.`;
 
 export type ChatPart =
   | { type: "text"; text: string }
