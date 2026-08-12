@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Send, Sparkles, Bot, User, Loader2, Lock, ImagePlus, Camera, X } from "lucide-react";
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 import { fileToCompressedDataUrl } from "@/lib/imageInput";
+import { ChatMarkdown } from "@/components/ChatMarkdown";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
@@ -291,9 +292,9 @@ function TutorPage() {
                     ? <User className="h-4 w-4 text-gold-foreground" />
                     : <Bot className="h-4 w-4 text-primary-foreground" />}
                 </div>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
                   m.role === "user"
-                    ? "bg-gradient-primary text-primary-foreground rounded-tr-sm"
+                    ? "bg-gradient-primary text-primary-foreground rounded-tr-sm whitespace-pre-wrap"
                     : "bg-card border border-border rounded-tl-sm"
                 }`}>
                   {m.image && (
@@ -303,7 +304,7 @@ function TutorPage() {
                       className="mb-2 max-h-60 w-full rounded-xl object-cover"
                     />
                   )}
-                  {m.content}
+                  {m.role === "user" ? m.content : <ChatMarkdown text={m.content} />}
                 </div>
               </div>
             ))}
@@ -313,7 +314,7 @@ function TutorPage() {
                 <div className="h-8 w-8 shrink-0 rounded-xl grid place-items-center bg-gradient-primary">
                   <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap bg-card border border-border rounded-tl-sm">
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm bg-card border border-border rounded-tl-sm">
                   {liveText.length === 0 ? (
                     <span className="inline-flex gap-1">
                       <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" />
@@ -322,7 +323,7 @@ function TutorPage() {
                     </span>
                   ) : (
                     <>
-                      {liveText}
+                      <ChatMarkdown text={liveText} />
                       <span className="inline-block w-[2px] h-4 -mb-0.5 ml-0.5 bg-primary align-middle animate-pulse" />
                     </>
                   )}
