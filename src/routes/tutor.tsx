@@ -216,7 +216,13 @@ function TutorPage() {
     abortRef.current = null;
     streamingRef.current = false;
     setStreaming(false);
+    // Freeze the answer at what's already visible so it commits right away.
+    setLiveText((shown) => {
+      targetRef.current = shown;
+      return shown;
+    });
   }, []);
+
 
   const onPickFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
