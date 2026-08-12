@@ -314,7 +314,7 @@ function TutorPage() {
                 <div className="h-8 w-8 shrink-0 rounded-xl grid place-items-center bg-gradient-primary">
                   <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap bg-card border border-border rounded-tl-sm">
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm bg-card border border-border rounded-tl-sm">
                   {liveText.length === 0 ? (
                     <span className="inline-flex gap-1">
                       <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" />
@@ -323,7 +323,7 @@ function TutorPage() {
                     </span>
                   ) : (
                     <>
-                      {liveText}
+                      <ChatMarkdown text={liveText} />
                       <span className="inline-block w-[2px] h-4 -mb-0.5 ml-0.5 bg-primary align-middle animate-pulse" />
                     </>
                   )}
