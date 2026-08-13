@@ -9,51 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VersusOnlineRouteImport } from './routes/versus-online'
-import { Route as VersusRouteImport } from './routes/versus'
-import { Route as TutorRouteImport } from './routes/tutor'
-import { Route as SubjectsRouteImport } from './routes/subjects'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CommunityRouteImport } from './routes/community'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SubjectsRouteImport } from './routes/subjects'
+import { Route as TutorRouteImport } from './routes/tutor'
+import { Route as VersusRouteImport } from './routes/versus'
+import { Route as VersusOnlineRouteImport } from './routes/versus-online'
 import { Route as SubjectsSubjectIdRouteImport } from './routes/subjects.$subjectId'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
-const VersusOnlineRoute = VersusOnlineRouteImport.update({
-  id: '/versus-online',
-  path: '/versus-online',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VersusRoute = VersusRouteImport.update({
-  id: '/versus',
-  path: '/versus',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TutorRoute = TutorRouteImport.update({
-  id: '/tutor',
-  path: '/tutor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubjectsRoute = SubjectsRouteImport.update({
-  id: '/subjects',
-  path: '/subjects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -61,9 +31,39 @@ const SplatRoute = SplatRouteImport.update({
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubjectsRoute = SubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorRoute = TutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VersusRoute = VersusRouteImport.update({
+  id: '/versus',
+  path: '/versus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VersusOnlineRoute = VersusOnlineRouteImport.update({
+  id: '/versus-online',
+  path: '/versus-online',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubjectsSubjectIdRoute = SubjectsSubjectIdRouteImport.update({
@@ -174,53 +174,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/versus-online': {
-      id: '/versus-online'
-      path: '/versus-online'
-      fullPath: '/versus-online'
-      preLoaderRoute: typeof VersusOnlineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/versus': {
-      id: '/versus'
-      path: '/versus'
-      fullPath: '/versus'
-      preLoaderRoute: typeof VersusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tutor': {
-      id: '/tutor'
-      path: '/tutor'
-      fullPath: '/tutor'
-      preLoaderRoute: typeof TutorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subjects': {
-      id: '/subjects'
-      path: '/subjects'
-      fullPath: '/subjects'
-      preLoaderRoute: typeof SubjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -230,11 +188,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subjects': {
+      id: '/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof SubjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tutor': {
+      id: '/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/versus': {
+      id: '/versus'
+      path: '/versus'
+      fullPath: '/versus'
+      preLoaderRoute: typeof VersusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/versus-online': {
+      id: '/versus-online'
+      path: '/versus-online'
+      fullPath: '/versus-online'
+      preLoaderRoute: typeof VersusOnlineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subjects/$subjectId': {

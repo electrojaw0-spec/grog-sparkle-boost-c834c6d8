@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { createUploadTicketFn, deleteImageFn, signImageFn } from "@/lib/community.functions";
+import { getGuestAuth } from "@/lib/guest";
 
 const BUCKET = "chat-images";
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -23,19 +25,18 @@ async function compressImage(file: File, maxDim = 1600, quality = 0.82): Promise
   return out;
 }
 
-export async function uploadPostImage(file: File, userId: string): Promise<string> {
+export async function uploadPostImage(file: File): Promise<string> {
   const blob = await compressImage(file);
-  const key = `${userId}/${crypto.randomUUID()}.webp`;
-  const { error } = await supabase.storage.from(BUCKET).upload(key, blob, {
-    contentType: "image/webp",
-    upsert: false,
-  });
+  const ticket = await createUploadTicketFn({ data: getGuestAuth() });
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .uploadToSignedUrl(ticket.path, ticket.token, blob, { contentType: "image/webp" });
   if (error) throw error;
-  return key;
+  return ticket.path;
 }
 
 export async function deletePostImage(path: string) {
-  await supabase.storage.from(BUCKET).remove([path]);
+  await deleteImageFn({ data: { ...getGuestAuth(), path } });
 }
 
 const urlCache = new Map<string, { url: string; expires: number }>();
@@ -44,8 +45,8 @@ export async function signedPostImageUrl(path: string): Promise<string | null> {
   const now = Date.now();
   const cached = urlCache.get(path);
   if (cached && cached.expires > now + 30_000) return cached.url;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60);
-  if (!data?.signedUrl) return null;
-  urlCache.set(path, { url: data.signedUrl, expires: now + 60 * 60 * 1000 });
-  return data.signedUrl;
+  const { url } = await signImageFn({ data: { path } });
+  if (!url) return null;
+  urlCache.set(path, { url, expires: now + 60 * 60 * 1000 });
+  return url;
 }

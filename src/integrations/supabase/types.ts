@@ -44,6 +44,24 @@ export type Database = {
         }
         Relationships: []
       }
+      devices: {
+        Row: {
+          created_at: string
+          id: string
+          secret_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          secret_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          secret_hash?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           author_id: string
