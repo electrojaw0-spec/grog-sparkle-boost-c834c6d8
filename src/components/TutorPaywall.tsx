@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Loader2, Check, Lock, MessageCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { redeemCodeFn } from "@/lib/accessCodes.functions";
 
 
 const STORAGE_KEY = "scholly_tutor_access_until";
@@ -37,31 +37,15 @@ export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) =
     if (!trimmed) return;
     setLoading(true);
     try {
-      const { data, error: qErr } = await supabase
-        .from("access_codes")
-        .select("id, plan, used")
-        .eq("code", trimmed)
-        .maybeSingle();
-      if (qErr) throw new Error(qErr.message);
-      if (!data) throw new Error("Invalid code");
-      if (data.used) throw new Error("This code has already been used");
-
-      const ms = data.plan === "month" ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-      const expiresAt = new Date(Date.now() + ms).toISOString();
-
-      const { error: uErr } = await supabase
-        .from("access_codes")
-        .update({ used: true, redeemed_at: new Date().toISOString(), expires_at: expiresAt })
-        .eq("id", data.id);
-      if (uErr) throw new Error(uErr.message);
-
-      onUnlock(Date.now() + ms);
+      const { untilMs } = await redeemCodeFn({ data: { code: trimmed } });
+      onUnlock(untilMs);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not redeem code");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-xl">
