@@ -1,0 +1,1 @@
+delete from public.posts where content = 'security test post';
