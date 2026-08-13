@@ -1,5 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getGuest as getGuestRaw, saveGuest } from "@/lib/guest";
+import { saveProfileFn } from "@/lib/community.functions";
+import { getGuestAuth } from "@/lib/guest";
+
+export function getGuest() {
+  return getGuestRaw(AVATAR_COUNT);
+}
+export { saveGuest };
 
 // Career-focused emoji avatars — 20 male/female pairs = 40 avatars.
 export interface AvatarDef {
@@ -91,42 +99,6 @@ export function primeProfile(p: Profile) {
   profileCache.set(p.id, p);
 }
 
-const GUEST_KEY = "scholly.guest.v1";
-
-interface GuestIdentity {
-  id: string;
-  display_name: string;
-  avatar_id: number;
-}
-
-function randomName() {
-  return `Scholar${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
-/** Browser-only. Returns the persistent device identity, creating it on first call. */
-export function getGuest(): GuestIdentity {
-  const raw = localStorage.getItem(GUEST_KEY);
-  if (raw) {
-    try {
-      const g = JSON.parse(raw) as GuestIdentity;
-      if (g?.id) return g;
-    } catch {
-      /* fall through */
-    }
-  }
-  const g: GuestIdentity = {
-    id: crypto.randomUUID(),
-    display_name: randomName(),
-    avatar_id: 1 + Math.floor(Math.random() * AVATAR_COUNT),
-  };
-  localStorage.setItem(GUEST_KEY, JSON.stringify(g));
-  return g;
-}
-
-function saveGuest(g: GuestIdentity) {
-  localStorage.setItem(GUEST_KEY, JSON.stringify(g));
-}
-
 /** Kept for API compatibility: everyone is a guest "user" identified by device. */
 export function useSession() {
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -153,7 +125,7 @@ export function useMyProfile() {
       let p = await fetchProfile(g.id);
       if (!p) {
         p = { id: g.id, display_name: g.display_name, avatar_id: g.avatar_id, school: null, course: null };
-        await supabase.from("profiles").upsert(p, { onConflict: "id" });
+        await saveProfileFn({ data: { ...getGuestAuth(), display_name: p.display_name, avatar_id: p.avatar_id, school: null, course: null } });
         profileCache.set(p.id, p);
       }
       if (cancelled) return;
@@ -180,8 +152,7 @@ export function useMyProfile() {
         school: data.school?.trim() || null,
         course: data.course?.trim() || null,
       };
-      const { error } = await supabase.from("profiles").upsert(row, { onConflict: "id" });
-      if (error) throw error;
+      await saveProfileFn({ data: { ...getGuestAuth(), display_name: row.display_name, avatar_id: row.avatar_id, school: row.school, course: row.course } });
       saveGuest({ id: row.id, display_name: row.display_name, avatar_id: row.avatar_id });
       profileCache.set(row.id, row);
       setProfile(row);

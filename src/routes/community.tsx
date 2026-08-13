@@ -4,7 +4,9 @@ import { AppShell } from "@/components/AppShell";
 import { UserAvatar } from "@/components/UserAvatar";
 import { PostImage } from "@/components/PostImage";
 import { useMyProfile, fetchProfile, type Profile } from "@/lib/profile";
-import { uploadPostImage, deletePostImage } from "@/lib/postImage";
+import { uploadPostImage } from "@/lib/postImage";
+import { getGuestAuth } from "@/lib/guest";
+import { createPostFn, deletePostFn, toggleLikeFn, createCommentFn, deleteCommentFn } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SUBJECTS } from "@/lib/subjects";
 import {
@@ -210,14 +212,15 @@ function CommunityPage() {
     setError(null);
     try {
       let image_path: string | null = null;
-      if (pendingFile) image_path = await uploadPostImage(pendingFile, user.id);
-      const { error } = await supabase.from("posts").insert({
-        author_id: user.id,
-        content: content ? content.slice(0, 2000) : null,
-        image_path,
-        subject_id: subject || null,
+      if (pendingFile) image_path = await uploadPostImage(pendingFile);
+      await createPostFn({
+        data: {
+          ...getGuestAuth(),
+          content: content ? content.slice(0, 2000) : null,
+          image_path,
+          subject_id: subject || null,
+        },
       });
-      if (error) throw error;
       setText("");
       setPendingFile(null);
       setSubject("");
@@ -232,8 +235,7 @@ function CommunityPage() {
     if (!user || p.author_id !== user.id) return;
     if (!confirm("Delete this post?")) return;
     setPosts((prev) => prev.filter((x) => x.id !== p.id));
-    if (p.image_path) await deletePostImage(p.image_path);
-    await supabase.from("posts").delete().eq("id", p.id).eq("author_id", user.id);
+    await deletePostFn({ data: { ...getGuestAuth(), postId: p.id } });
   };
 
   const toggleLike = async (p: Post) => {
@@ -251,11 +253,7 @@ function CommunityPage() {
         x.id === p.id ? { ...x, like_count: x.like_count + (liked ? -1 : 1) } : x,
       ),
     );
-    if (liked) {
-      await supabase.from("post_likes").delete().eq("post_id", p.id).eq("user_id", user.id);
-    } else {
-      await supabase.from("post_likes").insert({ post_id: p.id, user_id: user.id });
-    }
+    await toggleLikeFn({ data: { ...getGuestAuth(), postId: p.id, liked: !liked } });
   };
 
   if (profileLoading) {
@@ -578,9 +576,7 @@ function Comments({ postId }: { postId: string }) {
     if (!content || busy) return;
     setBusy(true);
     try {
-      await supabase
-        .from("post_comments")
-        .insert({ post_id: postId, author_id: user.id, content: content.slice(0, 1000) });
+      await createCommentFn({ data: { ...getGuestAuth(), postId, content: content.slice(0, 1000) } });
       setText("");
     } finally {
       setBusy(false);
@@ -590,7 +586,7 @@ function Comments({ postId }: { postId: string }) {
   const del = async (c: Comment) => {
     if (!user || c.author_id !== user.id) return;
     setComments((prev) => prev.filter((x) => x.id !== c.id));
-    await supabase.from("post_comments").delete().eq("id", c.id).eq("author_id", user.id);
+    await deleteCommentFn({ data: { ...getGuestAuth(), commentId: c.id } });
   };
 
   return (
