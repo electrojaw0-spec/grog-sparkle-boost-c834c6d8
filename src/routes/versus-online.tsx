@@ -52,6 +52,8 @@ function shuffleIdx(n: number, take: number) {
   return a.slice(0, take);
 }
 
+const SAVE_KEY = "scholly-versus-online-v1";
+
 function OnlineVersusPage() {
   const [mode, setMode] = useState<"home" | "create" | "join">("home");
   const [name, setName] = useState("");
@@ -63,6 +65,39 @@ function OnlineVersusPage() {
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const lockRef = useRef(false);
+
+  // Rejoin an in-progress room after navigating away / refreshing
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as { id: string; seat: 0 | 1 };
+        if (!saved?.id) return;
+        const { data } = await supabase.from("versus_rooms").select("*").eq("id", saved.id).maybeSingle();
+        if (!cancelled && data) {
+          setRoom(data as Room);
+          setSeat(saved.seat);
+        } else if (!cancelled) {
+          localStorage.removeItem(SAVE_KEY);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (room && seat !== null) localStorage.setItem(SAVE_KEY, JSON.stringify({ id: room.id, seat }));
+    } catch {
+      /* ignore */
+    }
+  }, [room?.id, seat]);
 
   // realtime subscription
   useEffect(() => {
@@ -79,6 +114,7 @@ function OnlineVersusPage() {
       supabase.removeChannel(channel);
     };
   }, [room?.id]);
+
 
   const subject = useMemo(
     () => SUBJECTS.find((s) => s.id === (room?.subject_id ?? subjectId))!,
@@ -229,12 +265,21 @@ function OnlineVersusPage() {
       .eq("id", room.id);
   }
 
-  function leaveRoom() {
+  function leaveRoom(force = false) {
+    if (!force && room && room.status !== "done") {
+      if (!confirm("Quit this battle? Your opponent will be left without a match.")) return;
+    }
+    try {
+      localStorage.removeItem(SAVE_KEY);
+    } catch {
+      /* ignore */
+    }
     setRoom(null);
     setSeat(null);
     setMode("home");
     setJoinCode("");
   }
+
 
   function copyCode() {
     if (!room) return;
@@ -390,7 +435,7 @@ function OnlineVersusPage() {
               <Loader2 className="h-4 w-4 animate-spin" /> Waiting for opponent to join…
             </div>
             <div className="mt-2 text-xs text-muted-foreground">{subject.emoji} {subject.name}</div>
-            <button onClick={leaveRoom} className="mt-6 text-xs text-muted-foreground underline">
+            <button onClick={() => leaveRoom()} className="mt-6 text-xs text-muted-foreground underline">
               Cancel room
             </button>
           </div>
@@ -527,7 +572,7 @@ function OnlineVersusPage() {
                 <RotateCcw className="h-4 w-4" /> Rematch
               </button>
               <button
-                onClick={leaveRoom}
+                onClick={() => leaveRoom()}
                 className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 text-sm font-semibold hover:bg-secondary transition-colors"
               >
                 Leave room

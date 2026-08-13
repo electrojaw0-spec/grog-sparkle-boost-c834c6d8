@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SUBJECTS } from "@/lib/subjects";
 import { QUESTIONS, type Question } from "@/lib/questions";
@@ -30,6 +30,8 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+const SAVE_KEY = "scholly-versus-local-v1";
+
 function VersusPage() {
   const [p1, setP1] = useState("");
   const [p2, setP2] = useState("");
@@ -40,10 +42,50 @@ function VersusPage() {
   const [turn, setTurn] = useState<0 | 1>(0); // 0 = p1, 1 = p2
   const [scores, setScores] = useState<[number, number]>([0, 0]);
   const [picks, setPicks] = useState<[number | null, number | null]>([null, null]);
+  const [restored, setRestored] = useState(false);
+
+  // Restore an in-progress match (so leaving the page never resets the battle)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s && s.phase && s.phase !== "setup") {
+          setP1(s.p1 ?? "");
+          setP2(s.p2 ?? "");
+          setSubjectId(s.subjectId ?? SUBJECTS[0].id);
+          setQuestions(s.questions ?? []);
+          setRound(s.round ?? 0);
+          setTurn(s.turn ?? 0);
+          setScores(s.scores ?? [0, 0]);
+          setPicks(s.picks ?? [null, null]);
+          setPhase(s.phase);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    setRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      if (phase === "setup") localStorage.removeItem(SAVE_KEY);
+      else
+        localStorage.setItem(
+          SAVE_KEY,
+          JSON.stringify({ p1, p2, subjectId, phase, questions, round, turn, scores, picks }),
+        );
+    } catch {
+      /* ignore */
+    }
+  }, [restored, p1, p2, subjectId, phase, questions, round, turn, scores, picks]);
 
   const subject = useMemo(() => SUBJECTS.find((s) => s.id === subjectId)!, [subjectId]);
   const names: [string, string] = [p1.trim() || "Player 1", p2.trim() || "Player 2"];
   const current = questions[round];
+
 
   const start = () => {
     const pool = QUESTIONS[subjectId] ?? [];
@@ -226,6 +268,18 @@ function VersusPage() {
             <div className="text-center text-xs text-muted-foreground mb-3">
               Round {round + 1} of {ROUNDS} · {subject.emoji} {subject.name}
             </div>
+
+            <div className="text-center mb-3">
+              <button
+                onClick={() => {
+                  if (confirm("Quit this battle? The match will be lost for both players.")) reset();
+                }}
+                className="text-[11px] text-muted-foreground underline hover:text-foreground"
+              >
+                Quit battle
+              </button>
+            </div>
+
 
             {/* READY screen — pass the phone */}
             {phase === "ready" && (
