@@ -269,6 +269,18 @@ function VersusPage() {
               Round {round + 1} of {ROUNDS} · {subject.emoji} {subject.name}
             </div>
 
+            <div className="text-center mb-3">
+              <button
+                onClick={() => {
+                  if (confirm("Quit this battle? The match will be lost for both players.")) reset();
+                }}
+                className="text-[11px] text-muted-foreground underline hover:text-foreground"
+              >
+                Quit battle
+              </button>
+            </div>
+
+
             {/* READY screen — pass the phone */}
             {phase === "ready" && (
               <div className="rounded-3xl bg-gradient-card border border-border p-8 text-center">
