@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  adminListCodesFn,
+  adminGenerateCodesFn,
+  adminUpdateCodeFn,
+  adminDeleteCodeFn,
+} from "@/lib/accessCodes.functions";
 import { Lock, Loader2, Plus, Trash2, RefreshCw, Copy, Check, Ban } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -9,9 +14,8 @@ export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin · Scholly.AI" }, { name: "robots", content: "noindex" }] }),
 });
 
-// Change this passphrase to whatever you want — only people who know it can manage codes.
-const ADMIN_PASSWORD = "scholly-admin-2026";
-const AUTH_KEY = "scholly_admin_ok";
+// The passphrase lives in the ADMIN_PASSCODE server secret and is verified server-side.
+const AUTH_KEY = "scholly_admin_pass";
 
 type Code = {
   id: string;
@@ -23,23 +27,34 @@ type Code = {
   created_at: string;
 };
 
-function randomCode() {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  let s = "SCHO-";
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
-}
-
 function AdminPage() {
-  const [authed, setAuthed] = useState(false);
+  const [pass, setPass] = useState<string | null>(null);
   const [pwd, setPwd] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem(AUTH_KEY) === "1") setAuthed(true);
+    if (typeof window === "undefined") return;
+    const saved = sessionStorage.getItem(AUTH_KEY);
+    if (saved) setPass(saved);
   }, []);
 
-  if (!authed) {
+  async function unlock(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setChecking(true);
+    try {
+      await adminListCodesFn({ data: { passphrase: pwd } });
+      sessionStorage.setItem(AUTH_KEY, pwd);
+      setPass(pwd);
+    } catch {
+      setErr("Wrong passphrase");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  if (!pass) {
     return (
       <AppShell>
         <div className="container mx-auto px-4 py-12 max-w-sm">
@@ -49,16 +64,7 @@ function AdminPage() {
             </div>
             <h1 className="font-display text-2xl font-bold">Admin</h1>
             <p className="text-xs text-muted-foreground mt-1">Enter the admin passphrase</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (pwd === ADMIN_PASSWORD) {
-                  localStorage.setItem(AUTH_KEY, "1");
-                  setAuthed(true);
-                } else setErr("Wrong passphrase");
-              }}
-              className="mt-5 space-y-3"
-            >
+            <form onSubmit={unlock} className="mt-5 space-y-3">
               <input
                 type="password"
                 value={pwd}
@@ -66,8 +72,11 @@ function AdminPage() {
                 placeholder="Passphrase"
                 className="w-full bg-secondary rounded-2xl px-4 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
-              <button className="w-full h-12 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold">
-                Unlock
+              <button
+                disabled={checking}
+                className="w-full h-12 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold disabled:opacity-50"
+              >
+                {checking ? "Checking…" : "Unlock"}
               </button>
               {err && <div className="text-xs text-destructive">{err}</div>}
             </form>
@@ -79,12 +88,12 @@ function AdminPage() {
 
   return (
     <AppShell>
-      <CodesManager onLogout={() => { localStorage.removeItem(AUTH_KEY); setAuthed(false); }} />
+      <CodesManager pass={pass} onLogout={() => { sessionStorage.removeItem(AUTH_KEY); setPass(null); }} />
     </AppShell>
   );
 }
 
-function CodesManager({ onLogout }: { onLogout: () => void }) {
+function CodesManager({ pass, onLogout }: { pass: string; onLogout: () => void }) {
   const [codes, setCodes] = useState<Code[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -96,68 +105,54 @@ function CodesManager({ onLogout }: { onLogout: () => void }) {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("access_codes")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) setMsg(error.message);
-    else setCodes((data as Code[]) || []);
+    try {
+      const data = await adminListCodesFn({ data: { passphrase: pass } });
+      setCodes((data as Code[]) || []);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Could not load codes");
+    }
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [pass]);
 
   async function generate() {
     setBusy(true); setMsg(null);
     try {
-      const rows = Array.from({ length: Math.max(1, Math.min(100, genCount)) }, () => ({
-        code: randomCode(), plan: genPlan,
-      }));
-      const { error } = await supabase.from("access_codes").insert(rows);
-      if (error) throw error;
-      setMsg(`Generated ${rows.length} ${genPlan} code(s)`);
+      const { count } = await adminGenerateCodesFn({
+        data: { passphrase: pass, plan: genPlan, count: genCount },
+      });
+      setMsg(`Generated ${count} ${genPlan} code(s)`);
       await load();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Failed to generate");
     } finally { setBusy(false); }
   }
 
-  async function deactivate(c: Code) {
+  async function act(c: Code, action: "deactivate" | "reactivate" | "regenerate") {
     setBusy(true); setMsg(null);
-    const { error } = await supabase
-      .from("access_codes")
-      .update({ used: true, redeemed_at: c.redeemed_at ?? new Date().toISOString() })
-      .eq("id", c.id);
-    if (error) setMsg(error.message); else await load();
+    try {
+      await adminUpdateCodeFn({ data: { passphrase: pass, id: c.id, action } });
+      await load();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Action failed");
+    }
     setBusy(false);
   }
 
-  async function reactivate(c: Code) {
-    setBusy(true); setMsg(null);
-    const { error } = await supabase
-      .from("access_codes")
-      .update({ used: false, redeemed_at: null, expires_at: null })
-      .eq("id", c.id);
-    if (error) setMsg(error.message); else await load();
-    setBusy(false);
-  }
-
-  async function regenerate(c: Code) {
-    setBusy(true); setMsg(null);
-    const newCode = randomCode();
-    const { error } = await supabase
-      .from("access_codes")
-      .update({ code: newCode, used: false, redeemed_at: null, expires_at: null })
-      .eq("id", c.id);
-    if (error) setMsg(error.message); else await load();
-    setBusy(false);
-  }
+  const deactivate = (c: Code) => act(c, "deactivate");
+  const reactivate = (c: Code) => act(c, "reactivate");
+  const regenerate = (c: Code) => act(c, "regenerate");
 
   async function remove(c: Code) {
     if (!confirm(`Delete code ${c.code}?`)) return;
     setBusy(true); setMsg(null);
-    const { error } = await supabase.from("access_codes").delete().eq("id", c.id);
-    if (error) setMsg(error.message); else await load();
+    try {
+      await adminDeleteCodeFn({ data: { passphrase: pass, id: c.id } });
+      await load();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Delete failed");
+    }
     setBusy(false);
   }
 
