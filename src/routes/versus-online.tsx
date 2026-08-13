@@ -265,12 +265,21 @@ function OnlineVersusPage() {
       .eq("id", room.id);
   }
 
-  function leaveRoom() {
+  function leaveRoom(force = false) {
+    if (!force && room && room.status !== "done") {
+      if (!confirm("Quit this battle? Your opponent will be left without a match.")) return;
+    }
+    try {
+      localStorage.removeItem(SAVE_KEY);
+    } catch {
+      /* ignore */
+    }
     setRoom(null);
     setSeat(null);
     setMode("home");
     setJoinCode("");
   }
+
 
   function copyCode() {
     if (!room) return;
