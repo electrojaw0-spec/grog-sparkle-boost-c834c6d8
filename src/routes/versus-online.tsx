@@ -435,7 +435,7 @@ function OnlineVersusPage() {
               <Loader2 className="h-4 w-4 animate-spin" /> Waiting for opponent to join…
             </div>
             <div className="mt-2 text-xs text-muted-foreground">{subject.emoji} {subject.name}</div>
-            <button onClick={leaveRoom} className="mt-6 text-xs text-muted-foreground underline">
+            <button onClick={() => leaveRoom()} className="mt-6 text-xs text-muted-foreground underline">
               Cancel room
             </button>
           </div>
@@ -572,7 +572,7 @@ function OnlineVersusPage() {
                 <RotateCcw className="h-4 w-4" /> Rematch
               </button>
               <button
-                onClick={leaveRoom}
+                onClick={() => leaveRoom()}
                 className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 text-sm font-semibold hover:bg-secondary transition-colors"
               >
                 Leave room
