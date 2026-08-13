@@ -52,6 +52,8 @@ function shuffleIdx(n: number, take: number) {
   return a.slice(0, take);
 }
 
+const SAVE_KEY = "scholly-versus-online-v1";
+
 function OnlineVersusPage() {
   const [mode, setMode] = useState<"home" | "create" | "join">("home");
   const [name, setName] = useState("");
@@ -63,6 +65,39 @@ function OnlineVersusPage() {
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const lockRef = useRef(false);
+
+  // Rejoin an in-progress room after navigating away / refreshing
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as { id: string; seat: 0 | 1 };
+        if (!saved?.id) return;
+        const { data } = await supabase.from("versus_rooms").select("*").eq("id", saved.id).maybeSingle();
+        if (!cancelled && data) {
+          setRoom(data as Room);
+          setSeat(saved.seat);
+        } else if (!cancelled) {
+          localStorage.removeItem(SAVE_KEY);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (room && seat !== null) localStorage.setItem(SAVE_KEY, JSON.stringify({ id: room.id, seat }));
+    } catch {
+      /* ignore */
+    }
+  }, [room?.id, seat]);
 
   // realtime subscription
   useEffect(() => {
@@ -79,6 +114,7 @@ function OnlineVersusPage() {
       supabase.removeChannel(channel);
     };
   }, [room?.id]);
+
 
   const subject = useMemo(
     () => SUBJECTS.find((s) => s.id === (room?.subject_id ?? subjectId))!,
