@@ -65,25 +65,28 @@ export type Database = {
       post_comments: {
         Row: {
           author_id: string
-          content: string
+          content: string | null
           created_at: string
           id: string
+          image_path: string | null
           post_id: string
           updated_at: string
         }
         Insert: {
           author_id: string
-          content: string
+          content?: string | null
           created_at?: string
           id?: string
+          image_path?: string | null
           post_id: string
           updated_at?: string
         }
         Update: {
           author_id?: string
-          content?: string
+          content?: string | null
           created_at?: string
           id?: string
+          image_path?: string | null
           post_id?: string
           updated_at?: string
         }
