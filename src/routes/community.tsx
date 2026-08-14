@@ -706,8 +706,8 @@ function Comments({ postId }: { postId: string }) {
             className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 shrink-0"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-
-        </button>
+          </button>
+        </div>
       </form>
     </div>
   );
