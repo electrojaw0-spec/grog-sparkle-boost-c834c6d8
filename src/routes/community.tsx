@@ -577,15 +577,21 @@ function Comments({ postId }: { postId: string }) {
     e.preventDefault();
     if (!user || !profile) return;
     const content = text.trim();
-    if (!content || busy) return;
+    if ((!content && !file) || busy) return;
     setBusy(true);
     try {
-      await createCommentFn({ data: { ...getGuestAuth(), postId, content: content.slice(0, 1000) } });
+      let imagePath: string | null = null;
+      if (file) imagePath = await uploadPostImage(file);
+      await createCommentFn({
+        data: { ...getGuestAuth(), postId, content: content.slice(0, 1000), imagePath },
+      });
       setText("");
+      setFile(null);
     } finally {
       setBusy(false);
     }
   };
+
 
   const del = async (c: Comment) => {
     if (!user || c.author_id !== user.id) return;
