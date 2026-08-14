@@ -109,7 +109,7 @@ export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) =
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               maxLength={32}
-              placeholder="e.g. SCHO-1234"
+              placeholder="e.g. 3K71M92"
               className="flex-1 bg-secondary rounded-2xl px-4 h-12 text-sm tracking-wider font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
             <button
