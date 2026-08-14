@@ -62,9 +62,16 @@ export const toggleLikeFn = createServerFn({ method: "POST" })
 
 export const createCommentFn = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    auth.extend({ postId: z.string().uuid(), content: z.string().max(2000) }).parse(d),
+    auth
+      .extend({
+        postId: z.string().uuid(),
+        content: z.string().max(2000),
+        imagePath: z.string().max(300).nullable().optional(),
+      })
+      .parse(d),
   )
-  .handler(async ({ data }) => addComment(data, data.postId, data.content));
+  .handler(async ({ data }) => addComment(data, data.postId, data.content, data.imagePath ?? null));
+
 
 export const deleteCommentFn = createServerFn({ method: "POST" })
   .inputValidator((d) => auth.extend({ commentId: z.string().uuid() }).parse(d))
