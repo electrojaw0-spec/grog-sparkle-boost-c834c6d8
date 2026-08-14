@@ -30,12 +30,21 @@ export async function redeem(rawCode: string) {
 }
 
 function randomCode() {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(6));
-  let s = "SCHO-";
-  for (const b of bytes) s += chars[b % chars.length];
-  return s;
+  // 7 characters: 5 digits + 2 letters, shuffled together (e.g. 3K71M92)
+  const letters = "ABCDEFGHJKMNPQRSTUVWXYZ";
+  const digits = "23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  let i = 0;
+  const pick = (set: string) => set[bytes[i++] % set.length];
+  const chars = [pick(digits), pick(digits), pick(digits), pick(digits), pick(digits), pick(letters), pick(letters)];
+  // Fisher-Yates shuffle so letters land in random positions
+  for (let j = chars.length - 1; j > 0; j--) {
+    const k = bytes[i++] % (j + 1);
+    [chars[j], chars[k]] = [chars[k], chars[j]];
+  }
+  return chars.join("");
 }
+
 
 export async function listCodes(pass: string) {
   requireAdmin(pass);
