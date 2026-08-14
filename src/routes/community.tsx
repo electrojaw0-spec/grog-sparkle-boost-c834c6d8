@@ -48,6 +48,7 @@ interface Comment {
   post_id: string;
   author_id: string;
   content: string;
+  image_path?: string | null;
   created_at: string;
 }
 
