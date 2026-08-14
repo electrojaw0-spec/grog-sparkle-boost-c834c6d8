@@ -519,13 +519,16 @@ function Comments({ postId }: { postId: string }) {
   const [authors, setAuthors] = useState<Record<string, Profile>>({});
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from("post_comments")
-        .select("id, post_id, author_id, content, created_at")
+        .select("id, post_id, author_id, content, image_path, created_at")
         .eq("post_id", postId)
         .order("created_at", { ascending: true })
         .limit(200);
