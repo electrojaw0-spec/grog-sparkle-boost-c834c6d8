@@ -629,7 +629,14 @@ function Comments({ postId }: { postId: string }) {
                       </button>
                     )}
                   </div>
-                  <p className="whitespace-pre-wrap break-words leading-snug">{c.content}</p>
+                  {c.content && (
+                    <p className="whitespace-pre-wrap break-words leading-snug">{c.content}</p>
+                  )}
+                  {c.image_path && (
+                    <div className="mt-2 rounded-xl overflow-hidden">
+                      <PostImage path={c.image_path} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -637,22 +644,69 @@ function Comments({ postId }: { postId: string }) {
         })
       )}
 
-      <form onSubmit={send} className="flex items-center gap-2 pt-2">
-        <UserAvatar avatarId={profile?.avatar_id ?? 1} name={profile?.display_name} size={28} />
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write a comment…"
-          maxLength={1000}
-          className="flex-1 bg-secondary rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-        />
-        <button
-          type="submit"
-          disabled={busy || !text.trim()}
-          className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50"
-        >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+      <form onSubmit={send} className="pt-2 space-y-2">
+        {file && (
+          <div className="flex items-center gap-2 text-xs bg-secondary rounded-xl px-3 py-2">
+            <ImagePlus className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate flex-1">{file.name}</span>
+            <button
+              type="button"
+              onClick={() => setFile(null)}
+              className="text-muted-foreground hover:text-destructive"
+              aria-label="Remove image"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <UserAvatar avatarId={profile?.avatar_id ?? 1} name={profile?.display_name} size={28} />
+          <input
+            ref={galleryRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          <button
+            type="button"
+            onClick={() => galleryRef.current?.click()}
+            className="h-9 w-9 rounded-full bg-secondary grid place-items-center text-muted-foreground hover:text-foreground shrink-0"
+            aria-label="Add photo"
+          >
+            <ImagePlus className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => cameraRef.current?.click()}
+            className="h-9 w-9 rounded-full bg-secondary grid place-items-center text-muted-foreground hover:text-foreground shrink-0"
+            aria-label="Take photo"
+          >
+            <Camera className="h-4 w-4" />
+          </button>
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write a reply…"
+            maxLength={1000}
+            className="flex-1 min-w-0 bg-secondary rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <button
+            type="submit"
+            disabled={busy || (!text.trim() && !file)}
+            className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 shrink-0"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+
         </button>
       </form>
     </div>
