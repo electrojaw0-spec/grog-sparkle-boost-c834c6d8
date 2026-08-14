@@ -72,16 +72,23 @@ export async function setLike(auth: Auth, postId: string, liked: boolean) {
   return { ok: true };
 }
 
-export async function addComment(auth: Auth, postId: string, content: string) {
+export async function addComment(
+  auth: Auth,
+  postId: string,
+  content: string,
+  imagePath?: string | null,
+) {
   const id = await requireDevice(auth.deviceId, auth.secret);
   const body = (content || "").trim().slice(0, 1000);
-  if (!body) throw new Error("Empty comment");
+  const image_path = imagePath && imagePath.startsWith(`${id}/`) ? imagePath : null;
+  if (!body && !image_path) throw new Error("Empty comment");
   const { error } = await supabaseAdmin
     .from("post_comments")
-    .insert({ post_id: postId, author_id: id, content: body });
+    .insert({ post_id: postId, author_id: id, content: body, image_path });
   if (error) throw new Error("Could not comment");
   return { ok: true };
 }
+
 
 export async function removeComment(auth: Auth, commentId: string) {
   const id = await requireDevice(auth.deviceId, auth.secret);
