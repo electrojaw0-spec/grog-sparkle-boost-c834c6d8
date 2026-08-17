@@ -38,6 +38,7 @@ function SubjectDetail() {
   const [picked, setPicked] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [examCount, setExamCount] = useState(10);
 
   const startSession = (m: "practice" | "exam", examCount = 10) => {
     const count = m === "exam" ? Math.min(examCount, bank.length) : bank.length;
