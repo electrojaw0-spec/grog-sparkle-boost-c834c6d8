@@ -39,8 +39,8 @@ function SubjectDetail() {
   const [revealed, setRevealed] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(0);
 
-  const startSession = (m: "practice" | "exam") => {
-    const count = m === "exam" ? Math.min(10, bank.length) : bank.length;
+  const startSession = (m: "practice" | "exam", examCount = 10) => {
+    const count = m === "exam" ? Math.min(examCount, bank.length) : bank.length;
     const qs = shuffle(bank).slice(0, count);
     setQuestions(qs);
     setAnswers(Array(qs.length).fill(-1));
