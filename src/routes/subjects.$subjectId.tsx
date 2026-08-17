@@ -117,12 +117,25 @@ function SubjectDetail() {
               <h3 className="font-display text-xl font-semibold">Practice Mode</h3>
               <p className="text-sm text-muted-foreground mt-1">Untimed. See explanations after each answer.</p>
             </button>
-            <button onClick={() => startSession("exam")} disabled={bank.length === 0}
-              className="group rounded-2xl bg-gradient-card border border-border hover:border-primary/30 p-6 text-left transition-colors disabled:opacity-50">
+            <div className="rounded-2xl bg-gradient-card border border-border p-6">
               <Timer className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-display text-xl font-semibold">Mock Exam</h3>
-              <p className="text-sm text-muted-foreground mt-1">10 questions, 1 min each. Score at the end.</p>
-            </button>
+              <p className="text-sm text-muted-foreground mt-1">Choose how many questions you want. 1 min each, score at the end.</p>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[10, 20, 50].map((n) => (
+                  <button key={n} onClick={() => setExamCount(n)} disabled={bank.length === 0}
+                    className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                      examCount === n ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}>
+                    {n} Q
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => startSession("exam", examCount)} disabled={bank.length === 0}
+                className="mt-4 w-full rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-gold-foreground glow-gold disabled:opacity-50">
+                Start {Math.min(examCount, bank.length)}-question exam
+              </button>
+            </div>
             <Link to="/tutor"
               className="sm:col-span-2 rounded-2xl bg-gradient-gold p-5 text-gold-foreground font-semibold flex items-center justify-between glow-gold hover:scale-[1.01] transition-transform">
               <span className="flex items-center gap-2"><Sparkles className="h-5 w-5" /> Ask Scholly about {subject.short}</span>
