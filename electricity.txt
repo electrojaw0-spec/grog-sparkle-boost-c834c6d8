@@ -1,0 +1,40 @@
+Electric current|The rate of flow of electric charge, measured in amperes|Circuits
+Voltage|The electrical pressure that drives current round a circuit|Circuits
+Resistance|The opposition offered by a conductor to the flow of current|Circuits
+Ohm's law|The law stating that V equals I multiplied by R|Circuits
+Series circuit|A circuit where components are connected end to end in one path|Circuits
+Parallel circuit|A circuit where components are connected across the same two points|Circuits
+Conductor|A material that allows electric current to pass through easily|Circuits
+Insulator|A material that does not allow electric current to flow|Circuits
+Semiconductor|A material whose conductivity lies between conductor and insulator|Circuits
+Electric power|The rate of using electrical energy, equal to V times I|Circuits
+Kilowatt hour|The unit of electrical energy used for billing consumers|Measurement
+Ammeter|An instrument connected in series to measure current|Measurement
+Voltmeter|An instrument connected in parallel to measure voltage|Measurement
+Ohmmeter|An instrument used to measure resistance directly|Measurement
+Megger|An instrument used to measure insulation resistance|Measurement
+Multimeter|An instrument that measures voltage, current and resistance|Measurement
+Wattmeter|An instrument used to measure electrical power|Measurement
+Fuse|A safety device that melts to break a circuit on excess current|Safety
+Circuit breaker|A device that automatically switches off a circuit under fault|Safety
+Earthing|Connecting metal parts to the ground for safety|Safety
+Short circuit|A fault where current flows through a path of very low resistance|Safety
+Overload|A condition where a circuit carries more current than its rating|Safety
+Residual current device|A device that trips when it detects earth leakage current|Safety
+Consumer unit|The board that distributes and protects final circuits in a building|Wiring
+Ring circuit|A wiring arrangement where the cable returns to the consumer unit|Wiring
+Radial circuit|A wiring arrangement where the cable ends at the last outlet|Wiring
+Conduit|A pipe used to protect and route electrical cables|Wiring
+Trunking|An enclosure with a removable lid used to carry cables|Wiring
+Cable rating|The maximum current a cable can carry safely|Wiring
+Two way switching|A wiring method that allows a lamp to be controlled from two points|Wiring
+Loop-in system|A wiring method where connections are made at the ceiling rose|Wiring
+Transformer|A device that steps voltage up or down by electromagnetic induction|Machines
+Step-down transformer|A transformer whose secondary voltage is lower than the primary|Machines
+Alternator|A machine that converts mechanical energy into alternating current|Machines
+Electric motor|A machine that converts electrical energy into mechanical energy|Machines
+Generator|A machine that converts mechanical energy into electrical energy|Machines
+Capacitor|A device used to store electric charge in a circuit|Circuits
+Inductor|A coil that opposes changes of current in a circuit|Circuits
+Power factor|The ratio of true power to apparent power in an ac circuit|Machines
+Alternating current|Current that reverses its direction periodically|Circuits
