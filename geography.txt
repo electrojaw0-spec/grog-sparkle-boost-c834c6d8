@@ -1,0 +1,40 @@
+Geography|The study of the earth, its features and human activities on it|Physical
+Weather|The condition of the atmosphere at a place at a particular time|Climate
+Climate|The average weather condition of a place over a long period|Climate
+Rainfall|Water droplets falling from clouds to the earth's surface|Climate
+Relief rainfall|Rain formed when moist air is forced to rise over highlands|Climate
+Convectional rainfall|Rain formed when heated moist air rises and cools|Climate
+Humidity|The amount of water vapour present in the atmosphere|Climate
+Barometer|An instrument used to measure atmospheric pressure|Climate
+Anemometer|An instrument used to measure wind speed|Climate
+Rain gauge|An instrument used to measure the amount of rainfall|Climate
+Harmattan|A dry dusty wind that blows from the Sahara in West Africa|Climate
+Erosion|The wearing away and removal of soil and rock by natural agents|Physical
+Weathering|The breakdown of rocks in situ by physical or chemical agents|Physical
+Igneous rock|A rock formed from the cooling and solidification of magma|Physical
+Sedimentary rock|A rock formed from the deposition of sediments in layers|Physical
+Metamorphic rock|A rock formed when existing rock is changed by heat and pressure|Physical
+Earthquake|A sudden shaking of the earth's crust caused by movement below|Physical
+Volcano|An opening in the crust through which magma reaches the surface|Physical
+Plateau|An extensive elevated land with a fairly flat top|Physical
+Delta|A triangular deposit of sediment at the mouth of a river|Physical
+Watershed|The high land separating two drainage basins|Physical
+Tributary|A smaller river that flows into a larger one|Physical
+Vegetation|The plant cover of an area|Physical
+Savanna|A tropical grassland with scattered trees|Physical
+Desertification|The gradual conversion of productive land into desert|Physical
+Contour line|A line on a map joining places of equal height|Map Reading
+Scale|The ratio of distance on a map to the actual distance on the ground|Map Reading
+Latitude|The angular distance of a place north or south of the equator|Map Reading
+Longitude|The angular distance of a place east or west of the prime meridian|Map Reading
+Greenwich meridian|The line of zero degrees longitude passing through London|Map Reading
+Gradient|The measure of the steepness of a slope|Map Reading
+Population density|The number of people per unit area of land|Human
+Census|The official counting of the people of a country|Human
+Migration|The movement of people from one place to another to settle|Human
+Urbanisation|The increasing movement of people from rural to urban areas|Human
+Settlement|A place where people live and carry out their activities|Human
+Mineral|A naturally occurring substance obtained from the earth|Nigeria
+Subsistence farming|Farming mainly to feed the farmer and his family|Nigeria
+Cash crop|A crop grown mainly for sale rather than for food|Nigeria
+Transportation|The movement of goods and people from one place to another|Nigeria
