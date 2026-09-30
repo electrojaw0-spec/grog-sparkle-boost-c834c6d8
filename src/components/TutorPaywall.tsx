@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Loader2, Check, Lock, MessageCircle } from "lucide-react";
 import { redeemCodeFn } from "@/lib/accessCodes.functions";
+import { checkSubscriptionFn } from "@/lib/subscription.functions";
+
+const CODE_KEY = "scholly_access_code";
 
 
 const STORAGE_KEY = "scholly_tutor_access_until";
@@ -15,7 +18,32 @@ export function useTutorAccess() {
       const n = parseInt(raw, 10);
       if (n > Date.now()) setUntil(n);
     }
+    // Re-verify against the server when we know the redeemed code
+    const code = localStorage.getItem(CODE_KEY);
+    if (code) {
+      checkSubscriptionFn({ data: { code } })
+        .then((r) => {
+          if (r.valid) {
+            localStorage.setItem(STORAGE_KEY, String(r.untilMs));
+            setUntil(r.untilMs);
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(CODE_KEY);
+            setUntil(null);
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
+  // Lock again as soon as the subscription expires mid-session
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!until) return;
+    const ms = until - Date.now();
+    if (ms <= 0) return;
+    const t = setTimeout(() => tick((x) => x + 1), Math.min(ms + 500, 2 ** 31 - 1));
+    return () => clearTimeout(t);
+  }, [until]);
   return {
     ready,
     until,
@@ -41,6 +69,7 @@ export function TutorPaywall({ onUnlock, reason, title = "Unlock the AI Tutor" }
     setLoading(true);
     try {
       const { untilMs } = await redeemCodeFn({ data: { code: trimmed } });
+      localStorage.setItem(CODE_KEY, trimmed);
       onUnlock(untilMs);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not redeem code");
