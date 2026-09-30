@@ -418,6 +418,23 @@ function TutorPage() {
                 </div>
               )}
 
+              <div className="mb-2 flex items-center gap-2 px-1">
+                <span className="text-[11px] text-muted-foreground">Send a photo of your question:</span>
+                <button
+                  type="button"
+                  onClick={() => cameraRef.current?.click()}
+                  className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Camera className="h-3.5 w-3.5" /> Take photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => galleryRef.current?.click()}
+                  className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ImagePlus className="h-3.5 w-3.5" /> From gallery
+                </button>
+              </div>
               <div className="flex items-end gap-2">
                 <button
                   type="button"
