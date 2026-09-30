@@ -7,7 +7,9 @@ const STORAGE_KEY = "scholly_tutor_access_until";
 
 export function useTutorAccess() {
   const [until, setUntil] = useState<number | null>(null);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
+    setReady(true);
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const n = parseInt(raw, 10);
@@ -15,6 +17,7 @@ export function useTutorAccess() {
     }
   }, []);
   return {
+    ready,
     until,
     hasAccess: until !== null && until > Date.now(),
     grant: (ms: number) => {
@@ -25,7 +28,7 @@ export function useTutorAccess() {
   };
 }
 
-export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) => void; reason?: string }) {
+export function TutorPaywall({ onUnlock, reason, title = "Unlock the AI Tutor" }: { onUnlock: (until: number) => void; reason?: string; title?: string }) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +61,7 @@ export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) =
         <div className="h-16 w-16 mx-auto rounded-3xl bg-gradient-gold grid place-items-center glow-gold mb-4">
           <Lock className="h-7 w-7 text-gold-foreground" />
         </div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold">Unlock the AI Tutor</h1>
+        <h1 className="font-display text-2xl md:text-3xl font-bold">{title}</h1>
         <p className="text-sm text-muted-foreground mt-2">
           Pay with Wave, then enter the access code we send you on WhatsApp.
         </p>
@@ -66,7 +69,7 @@ export function TutorPaywall({ onUnlock, reason }: { onUnlock: (until: number) =
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-border bg-card p-4 text-left">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">1 week</div>
-            <div className="font-display text-2xl font-bold mt-1">D10</div>
+            <div className="font-display text-2xl font-bold mt-1">D20</div>
           </div>
           <div className="rounded-2xl border border-primary/40 bg-card p-4 text-left relative">
             <div className="absolute -top-2 right-3 text-[10px] bg-gradient-gold text-gold-foreground px-2 py-0.5 rounded-full font-semibold">Best</div>

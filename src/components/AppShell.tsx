@@ -4,6 +4,7 @@ import schollyLogo from "@/assets/scholly-logo.png";
 import { useMyProfile } from "@/lib/profile";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -16,6 +17,9 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const { profile } = useMyProfile();
+  const access = useTutorAccess();
+  const isAdmin = pathname.startsWith("/admin");
+  const locked = !isAdmin && (!access.ready || !access.hasAccess);
 
 
   return (
@@ -65,7 +69,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {!locked ? (
+          children
+        ) : !access.ready ? (
+          <div className="py-24 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : (
+          <TutorPaywall
+            title="Subscribe to Scholly AI"
+            reason="An active subscription is needed to use Scholly AI — subjects, mock exams, versus, community and the AI Tutor."
+            onUnlock={(until) => access.grant(until - Date.now())}
+          />
+        )}
+      </main>
 
       <nav className="md:hidden sticky bottom-0 z-40 glass border-t">
         <div className="grid grid-cols-5">
