@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
 import {
   adminListCodesFn,
+  adminVerifyFn,
   adminGenerateCodesFn,
   adminUpdateCodeFn,
   adminDeleteCodeFn,
@@ -36,7 +37,13 @@ function AdminPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = sessionStorage.getItem(AUTH_KEY);
-    if (saved) setPass(saved);
+    if (!saved) return;
+    adminVerifyFn({ data: { passphrase: saved } })
+      .then((r) => {
+        if (r.ok) setPass(saved);
+        else sessionStorage.removeItem(AUTH_KEY);
+      })
+      .catch(() => sessionStorage.removeItem(AUTH_KEY));
   }, []);
 
   async function unlock(e: React.FormEvent) {
@@ -44,11 +51,15 @@ function AdminPage() {
     setErr(null);
     setChecking(true);
     try {
-      await adminListCodesFn({ data: { passphrase: pwd } });
-      sessionStorage.setItem(AUTH_KEY, pwd);
-      setPass(pwd);
+      const r = await adminVerifyFn({ data: { passphrase: pwd.trim() } });
+      if (!r.ok) {
+        setErr(r.error);
+        return;
+      }
+      sessionStorage.setItem(AUTH_KEY, pwd.trim());
+      setPass(pwd.trim());
     } catch {
-      setErr("Wrong passphrase");
+      setErr("Could not check passphrase. Try again.");
     } finally {
       setChecking(false);
     }

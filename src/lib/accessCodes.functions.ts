@@ -1,12 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { deleteCode, generateCodes, listCodes, redeem, updateCode } from "./accessCodes.server";
+import { deleteCode, generateCodes, listCodes, redeem, requireAdmin, updateCode } from "./accessCodes.server";
 
 const pass = z.object({ passphrase: z.string().min(1).max(200) });
 
 export const redeemCodeFn = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ code: z.string().min(1).max(32) }).parse(d))
   .handler(async ({ data }) => redeem(data.code));
+
+export const adminVerifyFn = createServerFn({ method: "POST" })
+  .inputValidator((d) => pass.parse(d))
+  .handler(async ({ data }) => {
+    try {
+      requireAdmin(data.passphrase);
+      return { ok: true as const };
+    } catch (e) {
+      return { ok: false as const, error: e instanceof Error ? e.message : "Wrong passphrase" };
+    }
+  });
 
 export const adminListCodesFn = createServerFn({ method: "POST" })
   .inputValidator((d) => pass.parse(d))
