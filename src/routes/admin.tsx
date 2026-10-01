@@ -196,7 +196,7 @@ function CodesManager({ pass, onLogout }: { pass: string; onLogout: () => void }
               className="block mt-1 bg-secondary rounded-xl px-3 h-10 text-sm focus:outline-none"
             >
               <option value="week">1 week (D20)</option>
-              <option value="month">1 month (D50)</option>
+              <option value="month">1 month (D100)</option>
             </select>
           </div>
           <div>

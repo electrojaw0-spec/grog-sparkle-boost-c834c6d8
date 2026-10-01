@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Sparkles, Loader2, Check, Lock, MessageCircle } from "lucide-react";
 import { redeemCodeFn } from "@/lib/accessCodes.functions";
 import { checkSubscriptionFn } from "@/lib/subscription.functions";
+import { checkTrialFn } from "@/lib/trial.functions";
+import { getGuestAuth } from "@/lib/guest";
 
 const CODE_KEY = "scholly_access_code";
 
@@ -10,9 +12,11 @@ const STORAGE_KEY = "scholly_tutor_access_until";
 
 export function useTutorAccess() {
   const [until, setUntil] = useState<number | null>(null);
-  const [ready, setReady] = useState(false);
+  const [trialUntil, setTrialUntil] = useState<number | null>(null);
+  const [subChecked, setSubChecked] = useState(false);
+  const [trialChecked, setTrialChecked] = useState(false);
+  const ready = subChecked && trialChecked;
   useEffect(() => {
-    setReady(true);
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const n = parseInt(raw, 10);
@@ -32,22 +36,36 @@ export function useTutorAccess() {
             setUntil(null);
           }
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => setSubChecked(true));
+    } else {
+      setSubChecked(true);
     }
+    // 48-hour free trial for new devices (server-timed)
+    checkTrialFn({ data: getGuestAuth() })
+      .then((r) => setTrialUntil(r.active ? r.untilMs : null))
+      .catch(() => {})
+      .finally(() => setTrialChecked(true));
   }, []);
-  // Lock again as soon as the subscription expires mid-session
+  // Lock again as soon as the subscription or trial expires mid-session
   const [, tick] = useState(0);
+  const effectiveUntil = Math.max(until ?? 0, trialUntil ?? 0) || null;
   useEffect(() => {
-    if (!until) return;
-    const ms = until - Date.now();
+    if (!effectiveUntil) return;
+    const ms = effectiveUntil - Date.now();
     if (ms <= 0) return;
     const t = setTimeout(() => tick((x) => x + 1), Math.min(ms + 500, 2 ** 31 - 1));
     return () => clearTimeout(t);
-  }, [until]);
+  }, [effectiveUntil]);
+  const subActive = until !== null && until > Date.now();
+  const trialActive = trialUntil !== null && trialUntil > Date.now();
   return {
     ready,
     until,
-    hasAccess: until !== null && until > Date.now(),
+    trialUntil,
+    onTrial: !subActive && trialActive,
+    hasAccess: subActive || trialActive,
+
     grant: (ms: number) => {
       const t = Date.now() + ms;
       localStorage.setItem(STORAGE_KEY, String(t));
@@ -103,7 +121,7 @@ export function TutorPaywall({ onUnlock, reason, title = "Unlock the AI Tutor" }
           <div className="rounded-2xl border border-primary/40 bg-card p-4 text-left relative">
             <div className="absolute -top-2 right-3 text-[10px] bg-gradient-gold text-gold-foreground px-2 py-0.5 rounded-full font-semibold">Best</div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">1 month</div>
-            <div className="font-display text-2xl font-bold mt-1">D50</div>
+            <div className="font-display text-2xl font-bold mt-1">D100</div>
           </div>
         </div>
 
