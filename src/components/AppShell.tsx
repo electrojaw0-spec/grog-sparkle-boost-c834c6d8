@@ -70,6 +70,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="flex-1">
+        {!isAdmin && access.ready && access.onTrial && access.trialUntil && (
+          <div className="bg-primary/15 text-foreground text-center text-xs font-semibold py-2 px-4">
+            Free trial: {Math.max(1, Math.ceil((access.trialUntil - Date.now()) / 3600000))} hours left of your 30-hour trial
+          </div>
+        )}
         {!locked ? (
           children
         ) : !access.ready ? (
