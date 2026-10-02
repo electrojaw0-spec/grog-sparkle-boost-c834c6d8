@@ -41,7 +41,7 @@ export function useTutorAccess() {
     } else {
       setSubChecked(true);
     }
-    // 48-hour free trial for new devices (server-timed)
+    // 30-hour free trial for new devices (server-timed)
     checkTrialFn({ data: getGuestAuth() })
       .then((r) => setTrialUntil(r.active ? r.untilMs : null))
       .catch(() => {})
