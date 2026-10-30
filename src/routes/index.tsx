@@ -11,10 +11,14 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "Scholly.AI — Your AI WAEC Study Companion" },
-      { name: "description", content: "A simple AI study app for WAEC. Ask questions, practice past papers, take mock exams." },
-      { property: "og:title", content: "Scholly.AI — AI WAEC Companion" },
-      { property: "og:description", content: "Ask. Practice. Pass." },
+      { title: "Scholly.AI — AI WAEC & WASSCE Study App" },
+      { name: "description", content: "AI tutor, real WAEC past questions and timed mock exams. Free 30-hour trial, then D20/week or D100/month." },
+      { property: "og:title", content: "Scholly.AI — AI WAEC & WASSCE Study App" },
+      { property: "og:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 30 hours." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Scholly.AI — AI WAEC & WASSCE Study App" },
+      { name: "twitter:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 30 hours." },
     ],
   }),
 });
