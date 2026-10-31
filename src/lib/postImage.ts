@@ -7,9 +7,15 @@ const MAX_BYTES = 8 * 1024 * 1024;
 const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 async function compressImage(file: File, maxDim = 1600, quality = 0.82): Promise<Blob> {
-  if (!ALLOWED.includes(file.type)) throw new Error("Only JPG, PNG or WEBP allowed");
-  if (file.size > MAX_BYTES) throw new Error("Image must be under 8 MB");
-  const bitmap = await createImageBitmap(file);
+  if (file.type && !file.type.startsWith("image/") && !ALLOWED.includes(file.type))
+    throw new Error("Please choose a photo");
+  if (file.size > MAX_BYTES * 3) throw new Error("Photo is too large");
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error("This photo format isn't supported. Try a JPG or PNG.");
+  }
   const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
   const w = Math.round(bitmap.width * scale);
   const h = Math.round(bitmap.height * scale);
