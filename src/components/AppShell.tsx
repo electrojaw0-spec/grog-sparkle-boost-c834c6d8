@@ -19,7 +19,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { profile } = useMyProfile();
   const access = useTutorAccess();
   const isAdmin = pathname.startsWith("/admin");
-  const locked = !isAdmin && (!access.ready || !access.hasAccess);
+  // The Tutor page enforces its own limit: 7 free messages, then the paywall.
+  const isTutor = pathname.startsWith("/tutor");
+  const locked = !isAdmin && !isTutor && (!access.ready || !access.hasAccess);
 
 
   return (

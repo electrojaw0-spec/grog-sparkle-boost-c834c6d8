@@ -523,6 +523,17 @@ function Comments({ postId }: { postId: string }) {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
+  const [err, setErr] = useState<string | null>(null);
+  const reload = async () => {
+    const { data } = await supabase
+      .from("post_comments")
+      .select("id, post_id, author_id, content, image_path, created_at")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (data) setComments(data as Comment[]);
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -587,6 +598,12 @@ function Comments({ postId }: { postId: string }) {
       });
       setText("");
       setFile(null);
+      setErr(null);
+      if (galleryRef.current) galleryRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
+      await reload();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Could not send reply. Try again.");
     } finally {
       setBusy(false);
     }
@@ -645,6 +662,7 @@ function Comments({ postId }: { postId: string }) {
       )}
 
       <form onSubmit={send} className="pt-2 space-y-2">
+        {err && <p className="text-xs text-destructive">{err}</p>}
         {file && (
           <div className="flex items-center gap-2 text-xs bg-secondary rounded-xl px-3 py-2">
             <ImagePlus className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -664,7 +682,7 @@ function Comments({ postId }: { postId: string }) {
           <input
             ref={galleryRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             className="hidden"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />

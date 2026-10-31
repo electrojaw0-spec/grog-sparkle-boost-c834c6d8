@@ -1,3 +1,4 @@
+import { EXTRA_QUESTIONS } from "./questions.extra";
 // AUTO-GENERATED. Edit /tmp/gen-questions.mjs to regenerate.
 export interface Question {
   id: string;
@@ -7400,6 +7401,11 @@ export const QUESTIONS: Record<string, Question[]> = {
     { id: "fi400", q: "Review: Tilapia is a", options: ["Freshwater fish","Marine fish","Salty only","Frozen only"], answer: 0, explain: "Common pond fish.", topic: "Fish Biology" },
   ],
 };
+
+// Merge the extra past-question bank into each subject.
+for (const _k of Object.keys(EXTRA_QUESTIONS)) {
+  QUESTIONS[_k] = [...(QUESTIONS[_k] ?? []), ...EXTRA_QUESTIONS[_k]];
+}
 
 // Deterministic per-question option shuffle so the correct answer isn't always "A".
 // Seeded by the question id, so the same question yields the same shuffle for
