@@ -5,6 +5,7 @@ import { Send, Sparkles, Bot, User, Square, Lock, ImagePlus, Camera, X, Loader2 
 import { TutorPaywall, useTutorAccess } from "@/components/TutorPaywall";
 import { fileToCompressedDataUrl } from "@/lib/imageInput";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
+import { tutorNeedsPayment } from "@/lib/tutorAccess";
 
 export const Route = createFileRoute("/tutor")({
   component: TutorPage,
@@ -12,6 +13,10 @@ export const Route = createFileRoute("/tutor")({
     meta: [
       { title: "AI Tutor · Scholly.AI" },
       { name: "description", content: "Chat with the Scholly AI tutor for instant WAEC explanations." },
+      { property: "og:title", content: "AI Tutor · Scholly.AI" },
+      { property: "og:description", content: "Study WAEC topics with Scholly AI during your 30-day free trial." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });
@@ -38,7 +43,7 @@ function TutorPage() {
   }, []);
 
   const freeLeft = Math.max(0, FREE_LIMIT - freeUsed);
-  const outOfFree = !access.hasAccess && freeUsed >= FREE_LIMIT;
+  const outOfFree = tutorNeedsPayment(access.ready, access.hasAccess, freeUsed);
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -77,8 +82,10 @@ function TutorPage() {
   }, [messages, liveText, streaming]);
 
   useEffect(() => {
-    if (outOfFree) setShowFullPaywall(true);
-  }, [outOfFree]);
+    if (!access.ready) return;
+    if (access.hasAccess) setShowFullPaywall(false);
+    else if (outOfFree) setShowFullPaywall(true);
+  }, [access.ready, access.hasAccess, outOfFree]);
 
   useEffect(() => () => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
@@ -124,8 +131,8 @@ function TutorPage() {
   const send = useCallback(async (text?: string, imageOverride?: string | null) => {
     const content = (text ?? input).trim();
     const image = imageOverride !== undefined ? imageOverride : pendingImage;
-    if ((!content && !image) || streaming) return;
-    if (!access.hasAccess && freeUsed >= FREE_LIMIT) {
+    if ((!content && !image) || streaming || !access.ready) return;
+    if (outOfFree) {
       setShowFullPaywall(true);
       return;
     }
@@ -208,7 +215,7 @@ function TutorPage() {
       setStreaming(false);
       streamingRef.current = false;
     }
-  }, [input, pendingImage, streaming, freeUsed, access.hasAccess, messages, startTypewriter]);
+  }, [input, pendingImage, streaming, freeUsed, access.ready, access.hasAccess, outOfFree, messages, startTypewriter]);
 
   const stop = useCallback(() => {
     stoppedRef.current = true;
@@ -254,7 +261,7 @@ function TutorPage() {
         </div>
 
         {/* Prominent free trial counter */}
-        {!access.hasAccess && (
+        {access.ready && !access.hasAccess && (
           <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -300,7 +307,7 @@ function TutorPage() {
                     <button
                       key={s}
                       onClick={() => send(s)}
-                      disabled={outOfFree}
+                      disabled={!access.ready || outOfFree}
                       className="text-left text-sm rounded-xl bg-secondary hover:bg-secondary/80 transition-colors p-3 border border-border disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {s}
@@ -400,7 +407,7 @@ function TutorPage() {
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                   ) : (
-                    <img src={pendingImage!} alt="Photo preview" className="h-16 w-16 rounded-xl object-cover" />
+                    <img src={pendingImage ?? undefined} alt="Photo preview" className="h-16 w-16 rounded-xl object-cover" />
                   )}
                   <span className="flex-1 text-xs text-muted-foreground">
                     {preparing ? "Preparing photo…" : "Photo attached — add a question or just send it."}
@@ -466,7 +473,7 @@ function TutorPage() {
                   type={streaming || liveActive ? "button" : "submit"}
                   onClick={streaming || liveActive ? stop : undefined}
                   aria-label={streaming || liveActive ? "Stop response" : "Send message"}
-                  disabled={!(streaming || liveActive) && (preparing || (!input.trim() && !pendingImage))}
+                  disabled={!(streaming || liveActive) && (!access.ready || preparing || (!input.trim() && !pendingImage))}
                   className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-gold grid place-items-center text-gold-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.05] transition-transform glow-gold"
                 >
                   {streaming || liveActive ? <Square className="h-4 w-4 fill-current" /> : <Send className="h-5 w-5" />}
@@ -478,7 +485,7 @@ function TutorPage() {
       </div>
 
       {/* Full-screen paywall overlay */}
-      {showFullPaywall && (
+      {showFullPaywall && access.ready && !access.hasAccess && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
           <div className="absolute top-4 right-4">
             <button
