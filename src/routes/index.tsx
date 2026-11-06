@@ -12,13 +12,13 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Scholly.AI — AI WAEC & WASSCE Study App" },
-      { name: "description", content: "AI tutor, real WAEC past questions and timed mock exams. Free 30-hour trial, then D20/week or D100/month." },
+      { name: "description", content: "AI tutor, real WAEC past questions and timed mock exams. Free 1-month (30-day) trial, then D20/week or D100/month." },
       { property: "og:title", content: "Scholly.AI — AI WAEC & WASSCE Study App" },
-      { property: "og:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 30 hours." },
+      { property: "og:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 1 month (30 days)." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Scholly.AI — AI WAEC & WASSCE Study App" },
-      { name: "twitter:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 30 hours." },
+      { name: "twitter:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 1 month (30 days)." },
     ],
   }),
 });
@@ -90,7 +90,7 @@ function HomePage() {
               Made for WAEC & WASSCE students
             </div>
             <h1 className="font-display text-4xl md:text-6xl font-bold leading-[1.05]">
-              Your <span className="text-gradient-gold">free AI tutor</span> for WAEC.
+              Your <span className="text-gradient-gold">AI tutor</span> for WAEC.
             </h1>
             <p className="mt-5 text-base md:text-lg text-muted-foreground">
               Scholly helps you study smarter — ask any question, practice real past papers,
@@ -113,7 +113,7 @@ function HomePage() {
               <InstallButton />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              No sign-up needed · 100% free · Works on slow internet
+              No sign-up needed · 1-month (30-day) free trial · Then D20/week or D100/month
             </p>
           </div>
         </div>
@@ -194,7 +194,7 @@ function HomePage() {
           <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-8">Why students love Scholly</h2>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             {[
-              "100% free — no card, no sign-up",
+              "1-month (30-day) free trial — no card, no sign-up",
               "Real WAEC past questions (2015–2024)",
               "Step-by-step answers, not just results",
               "Works on any phone, even on slow internet",
@@ -216,9 +216,9 @@ function HomePage() {
               <Heart className="h-3.5 w-3.5" />
               Support the project
             </div>
-            <h3 className="font-display text-xl md:text-2xl font-bold">Keep Scholly free for every student</h3>
+            <h3 className="font-display text-xl md:text-2xl font-bold">Support Scholly’s free student trial</h3>
             <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
-              Scholly runs on donations. If it helped you study, a small contribution keeps it running for others.
+              If Scholly helped you study, a voluntary contribution supports the free trial for other students.
             </p>
             <div className="mt-5 inline-flex flex-col items-center gap-2 rounded-2xl bg-[#0055FF]/10 border border-[#0055FF]/30 px-6 py-4 text-sm">
               <p className="font-medium text-[#0055FF]">Send on Wave to</p>
@@ -252,7 +252,7 @@ function HomePage() {
               to="/tutor"
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-8 py-3.5 text-base font-semibold text-gold-foreground glow-gold hover:scale-[1.03] transition-transform"
             >
-              <Sparkles className="h-5 w-5" /> Start now — it's free
+              <Sparkles className="h-5 w-5" /> Start your free trial
             </Link>
           </div>
         </div>

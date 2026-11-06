@@ -41,14 +41,14 @@ export function useTutorAccess() {
     } else {
       setSubChecked(true);
     }
-    // 30-hour free trial for new devices (server-timed)
+    // 30-day free trial for devices (server-timed)
     checkTrialFn({ data: getGuestAuth() })
       .then((r) => setTrialUntil(r.active ? r.untilMs : null))
       .catch(() => {})
       .finally(() => setTrialChecked(true));
   }, []);
   // Lock again as soon as the subscription or trial expires mid-session
-  const [, tick] = useState(0);
+  const [expiryTick, tick] = useState(0);
   const effectiveUntil = Math.max(until ?? 0, trialUntil ?? 0) || null;
   useEffect(() => {
     if (!effectiveUntil) return;
@@ -56,7 +56,7 @@ export function useTutorAccess() {
     if (ms <= 0) return;
     const t = setTimeout(() => tick((x) => x + 1), Math.min(ms + 500, 2 ** 31 - 1));
     return () => clearTimeout(t);
-  }, [effectiveUntil]);
+  }, [effectiveUntil, expiryTick]);
   const subActive = until !== null && until > Date.now();
   const trialActive = trialUntil !== null && trialUntil > Date.now();
   return {
