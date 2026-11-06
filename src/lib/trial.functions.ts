@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { trialStatus } from "./trial";
 
-export const TRIAL_MS = 30 * 60 * 60 * 1000;
+export { TRIAL_MS } from "./trial";
 
-// Starts (on first call for a brand-new device) or reads the 30h free trial.
+// Starts (on first call for a brand-new device) or reads the 30-day free trial.
 // Trial start = server-recorded device registration time, so it survives refreshes
 // and can't be extended by editing the device clock or saved values.
 export const checkTrialFn = createServerFn({ method: "POST" })
@@ -21,6 +22,5 @@ export const checkTrialFn = createServerFn({ method: "POST" })
       .eq("id", data.deviceId)
       .maybeSingle();
     if (!row) return { active: false, untilMs: 0 };
-    const untilMs = new Date(row.created_at).getTime() + TRIAL_MS;
-    return { active: untilMs > Date.now(), untilMs };
+    return trialStatus(row.created_at, Date.now());
   });
