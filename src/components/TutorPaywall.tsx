@@ -116,12 +116,12 @@ export function TutorPaywall({ onUnlock, reason, title = "Unlock the AI Tutor" }
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-border bg-card p-4 text-left">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">1 week</div>
-            <div className="font-display text-2xl font-bold mt-1">D20</div>
+            <div className="font-display text-2xl font-bold mt-1">D10</div>
           </div>
           <div className="rounded-2xl border border-primary/40 bg-card p-4 text-left relative">
             <div className="absolute -top-2 right-3 text-[10px] bg-gradient-gold text-gold-foreground px-2 py-0.5 rounded-full font-semibold">Best</div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">1 month</div>
-            <div className="font-display text-2xl font-bold mt-1">D100</div>
+            <div className="font-display text-2xl font-bold mt-1">D50</div>
           </div>
         </div>
 

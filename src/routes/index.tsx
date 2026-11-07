@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Scholly.AI — AI WAEC & WASSCE Study App" },
-      { name: "description", content: "AI tutor, real WAEC past questions and timed mock exams. Free 1-month (30-day) trial, then D20/week or D100/month." },
+      { name: "description", content: "AI tutor, real WAEC past questions and timed mock exams. Free 1-month (30-day) trial, then D10/week or D50/month." },
       { property: "og:title", content: "Scholly.AI — AI WAEC & WASSCE Study App" },
       { property: "og:description", content: "Ask the AI tutor, practice past papers, take mock exams. Try free for 1 month (30 days)." },
       { property: "og:type", content: "website" },
@@ -113,7 +113,7 @@ function HomePage() {
               <InstallButton />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              No sign-up needed · 1-month (30-day) free trial · Then D20/week or D100/month
+              No sign-up needed · 1-month (30-day) free trial · Then D10/week or D50/month
             </p>
           </div>
         </div>
