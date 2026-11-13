@@ -206,9 +206,11 @@ export type Database = {
           player1_name: string
           player2_name: string | null
           question_indexes: number[]
+          round_deadline: string | null
           scores: number[]
           status: string
           subject_id: string
+          time_limit_seconds: number
           updated_at: string
         }
         Insert: {
@@ -224,9 +226,11 @@ export type Database = {
           player1_name: string
           player2_name?: string | null
           question_indexes?: number[]
+          round_deadline?: string | null
           scores?: number[]
           status?: string
           subject_id: string
+          time_limit_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -242,9 +246,11 @@ export type Database = {
           player1_name?: string
           player2_name?: string | null
           question_indexes?: number[]
+          round_deadline?: string | null
           scores?: number[]
           status?: string
           subject_id?: string
+          time_limit_seconds?: number
           updated_at?: string
         }
         Relationships: []
@@ -254,7 +260,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_versus_answer: {
+        Args: {
+          p_correct: number
+          p_pick: number
+          p_room: string
+          p_round: number
+          p_seat: number
+        }
+        Returns: {
+          code: string
+          created_at: string
+          current_round: number
+          current_turn: number
+          id: string
+          last_pick: number | null
+          p1_pick: number | null
+          p2_pick: number | null
+          phase: string
+          player1_name: string
+          player2_name: string | null
+          question_indexes: number[]
+          round_deadline: string | null
+          scores: number[]
+          status: string
+          subject_id: string
+          time_limit_seconds: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "versus_rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
