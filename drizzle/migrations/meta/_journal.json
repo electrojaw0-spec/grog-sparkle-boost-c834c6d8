@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794566234909,
+      "tag": "0000_versus_timed_atomic_rounds",
+      "breakpoints": true
+    }
+  ]
+}
