@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { SUBJECTS } from "@/lib/subjects";
 import { QUESTIONS } from "@/lib/questions";
 import { supabase } from "@/integrations/supabase/client";
+import { BattleTimePicker, BattleTimer } from "@/components/BattleTimer";
+import { formatTime, secondsLeft, TIMED_OUT } from "@/lib/versusRules";
 import { Swords, Crown, Trophy, RotateCcw, ChevronRight, Copy, Wifi, Loader2, Check, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/versus-online")({
@@ -24,6 +26,8 @@ export const Route = createFileRoute("/versus-online")({
 const ROUNDS = 5;
 
 type Room = {
+  time_limit_seconds: number;
+  round_deadline: string | null;
   id: string;
   code: string;
   subject_id: string;
@@ -68,6 +72,8 @@ function OnlineVersusPage() {
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const lockRef = useRef(false);
+  const [timeLimit, setTimeLimit] = useState(60);
+  const [now, setNow] = useState(Date.now());
 
   // Rejoin an in-progress room after navigating away / refreshing
   useEffect(() => {
@@ -120,7 +126,7 @@ function OnlineVersusPage() {
 
 
   const subject = useMemo(
-    () => SUBJECTS.find((s) => s.id === (room?.subject_id ?? subjectId))!,
+    () => SUBJECTS.find((s) => s.id === (room?.subject_id ?? subjectId)) ?? SUBJECTS[0],
     [room?.subject_id, subjectId],
   );
   const pool = room ? QUESTIONS[room.subject_id] ?? [] : [];
@@ -143,6 +149,7 @@ function OnlineVersusPage() {
         player1_name: name.trim(),
         question_indexes: indexes,
         phase: "answer",
+        time_limit_seconds: timeLimit,
       })
       .select()
       .single();
@@ -167,7 +174,11 @@ function OnlineVersusPage() {
       setBusy(false);
       return setErr("Room not found");
     }
-    if (found.player2_name && found.player2_name !== name.trim()) {
+    if (found.status === "done") {
+      setBusy(false);
+      return setErr("This battle has finished. Ask for a new room code.");
+    }
+    if (found.player2_name) {
       setBusy(false);
       return setErr("Room is full");
     }
@@ -180,6 +191,8 @@ function OnlineVersusPage() {
         updated_at: new Date().toISOString(),
       })
       .eq("id", found.id)
+      .eq("status", "waiting")
+      .is("player2_name", null)
       .select()
       .single();
     setBusy(false);
@@ -188,101 +201,88 @@ function OnlineVersusPage() {
     setSeat(1);
   }
 
-  async function answer(i: number) {
-    if (!room || !current || lockRef.current || seat === null) return;
-    if (room.phase !== "answer") return;
-    if (myPick !== null) return; // already answered
+  const remaining = secondsLeft(room?.round_deadline ? Date.parse(room.round_deadline) : null, now);
 
-    lockRef.current = true;
-    const otherPick = seat === 0 ? room.p2_pick : room.p1_pick;
-
-    const update: {
-      p1_pick?: number | null;
-      p2_pick?: number | null;
-      scores?: number[];
-      phase?: "ready" | "answer" | "reveal" | "done";
-      updated_at: string;
-    } = {
-      updated_at: new Date().toISOString(),
+  // Reconcile after lost realtime events, reconnects and tab suspension.
+  useEffect(() => {
+    if (!room) return;
+    let cancelled = false;
+    let fetching = false;
+    const id = room.id;
+    const refresh = async () => {
+      if (fetching) return;
+      fetching = true;
+      const { data, error } = await supabase.from("versus_rooms").select("*").eq("id", id).maybeSingle();
+      fetching = false;
+      if (!cancelled && data) setRoom(data as Room);
+      if (!cancelled && error) setErr("Connection interrupted. Retrying your battle…");
     };
-    if (seat === 0) update.p1_pick = i;
-    else update.p2_pick = i;
+    const poll = window.setInterval(refresh, 2000);
+    window.addEventListener("online", refresh);
+    window.addEventListener("focus", refresh);
+    void refresh();
+    return () => { cancelled = true; clearInterval(poll); window.removeEventListener("online", refresh); window.removeEventListener("focus", refresh); };
+  }, [room?.id]);
 
-    if (otherPick !== null) {
-      const p1 = seat === 0 ? i : room.p1_pick!;
-      const p2 = seat === 1 ? i : room.p2_pick!;
-      const nextScores = [...room.scores];
-      if (p1 === current.answer) nextScores[0] += 1;
-      if (p2 === current.answer) nextScores[1] += 1;
-      update.scores = nextScores;
-      update.phase = "reveal";
-    }
-
-    const { error } = await supabase.from("versus_rooms").update(update).eq("id", room.id);
-    lockRef.current = false;
-    if (error) setErr(error.message);
+  async function answer(i: number) {
+    if (!room || !current || lockRef.current || seat === null || room.status !== "playing" || room.phase !== "answer") return;
+    if (i !== TIMED_OUT && myPick !== null) return;
+    lockRef.current = true;
+    try {
+      const { data, error } = await supabase.rpc("submit_versus_answer", {
+        p_room: room.id, p_round: room.current_round, p_seat: seat, p_pick: i, p_correct: current.answer,
+      });
+      if (error) setErr("Could not save your answer. Please retry; your battle is still saved.");
+      else if (data) { setRoom(data as Room); setErr(null); }
+    } finally { lockRef.current = false; }
   }
 
+  useEffect(() => {
+    if (room?.status !== "playing" || room.phase !== "answer") return;
+    const tick = () => {
+      setNow(Date.now());
+      if (room.round_deadline && Date.now() >= Date.parse(room.round_deadline)) void answer(TIMED_OUT);
+    };
+    tick();
+    const interval = window.setInterval(tick, 250);
+    return () => clearInterval(interval);
+  }, [room, seat]);
+
   async function nextRound() {
-    if (!room || lockRef.current) return;
+    if (!room || room.phase !== "reveal" || lockRef.current) return;
     lockRef.current = true;
-    const isLastRound = room.current_round === ROUNDS - 1;
-    if (isLastRound) {
-      await supabase
-        .from("versus_rooms")
-        .update({ phase: "done", status: "done", updated_at: new Date().toISOString() })
-        .eq("id", room.id);
-    } else {
-      await supabase
-        .from("versus_rooms")
-        .update({
-          current_round: room.current_round + 1,
-          phase: "answer",
-          p1_pick: null,
-          p2_pick: null,
-          last_pick: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", room.id);
-    }
+    const last = room.current_round >= room.question_indexes.length - 1;
+    const { data, error } = await supabase.from("versus_rooms").update(last
+      ? { phase: "done", status: "done", updated_at: new Date().toISOString() }
+      : { current_round: room.current_round + 1, phase: "answer", p1_pick: null, p2_pick: null, last_pick: null, updated_at: new Date().toISOString() })
+      .eq("id", room.id).eq("phase", "reveal").eq("current_round", room.current_round).select().maybeSingle();
     lockRef.current = false;
+    if (error) setErr("Could not advance the round. Please retry.");
+    else if (data) { setRoom(data as Room); setNow(Date.now()); setErr(null); }
   }
 
   async function rematch() {
-    if (!room) return;
-    const indexes = shuffleIdx((QUESTIONS[room.subject_id] ?? []).length, ROUNDS);
-    await supabase
-      .from("versus_rooms")
-      .update({
-        question_indexes: indexes,
-        current_round: 0,
-        current_turn: 0,
-        scores: [0, 0],
-        phase: "answer",
-        p1_pick: null,
-        p2_pick: null,
-        last_pick: null,
-        status: "playing",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", room.id);
+    if (!room || room.status !== "done" || lockRef.current) return;
+    lockRef.current = true;
+    const { data, error } = await supabase.from("versus_rooms").update({
+      question_indexes: shuffleIdx((QUESTIONS[room.subject_id] ?? []).length, ROUNDS),
+      current_round: 0, current_turn: 0, scores: [0, 0], phase: "answer", p1_pick: null, p2_pick: null,
+      last_pick: null, status: "playing", updated_at: new Date().toISOString(),
+    }).eq("id", room.id).eq("status", "done").select().maybeSingle();
+    lockRef.current = false;
+    if (error) setErr("Could not start a rematch. Please retry.");
+    else if (data) { setRoom(data as Room); setNow(Date.now()); }
   }
 
-  function leaveRoom(force = false) {
-    if (!force && room && room.status !== "done") {
-      if (!confirm("Quit this battle? Your opponent will be left without a match.")) return;
+  async function leaveRoom() {
+    if (room && room.status !== "done") {
+      if (!confirm("Quit this battle for both players?")) return;
+      const { error } = await supabase.from("versus_rooms").update({ status: "done", phase: "done", updated_at: new Date().toISOString() }).eq("id", room.id);
+      if (error) return setErr("Could not quit while disconnected. Please retry.");
     }
-    try {
-      localStorage.removeItem(SAVE_KEY);
-    } catch {
-      /* ignore */
-    }
-    setRoom(null);
-    setSeat(null);
-    setMode("home");
-    setJoinCode("");
+    try { localStorage.removeItem(SAVE_KEY); } catch { /* ignore */ }
+    setRoom(null); setSeat(null); setMode("home"); setJoinCode("");
   }
-
 
   function copyCode() {
     if (!room) return;
@@ -360,6 +360,7 @@ function OnlineVersusPage() {
                 ))}
               </div>
             </div>
+            <BattleTimePicker value={timeLimit} onChange={setTimeLimit} />
             {err && <div className="text-sm text-destructive">{err}</div>}
             <div className="flex gap-3">
               <button
@@ -437,7 +438,7 @@ function OnlineVersusPage() {
             <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
               <Loader2 className="h-4 w-4 animate-spin" /> Waiting for opponent to join…
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">{subject.emoji} {subject.name}</div>
+            <div className="mt-2 text-xs text-muted-foreground">{subject.emoji} {subject.name} · {formatTime(room.time_limit_seconds)} per question</div>
             <button onClick={() => leaveRoom()} className="mt-6 text-xs text-muted-foreground underline">
               Cancel room
             </button>
@@ -480,6 +481,8 @@ function OnlineVersusPage() {
               </Button>
             </div>
 
+            {err && <p role="alert" className="text-sm text-destructive text-center mb-3">{err}</p>}
+            {room.phase === "answer" && <BattleTimer remaining={remaining} />}
             {(room.phase === "answer" || room.phase === "reveal") && current && (
               <div className="rounded-3xl bg-gradient-card border border-border p-6">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">{current.topic}</div>
@@ -503,7 +506,7 @@ function OnlineVersusPage() {
                     return (
                       <button
                         key={i}
-                        disabled={room.phase !== "answer" || myPick !== null}
+                        disabled={room.phase !== "answer" || myPick !== null || remaining === 0}
                         onClick={() => answer(i)}
                         className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all ${cls}`}
                       >
@@ -535,6 +538,7 @@ function OnlineVersusPage() {
                       {names[0]}: {room.p1_pick === current.answer ? "✓ +1" : "✗"} · {names[1]}:{" "}
                       {room.p2_pick === current.answer ? "✓ +1" : "✗"}
                     </div>
+                    {(room.p1_pick === TIMED_OUT || room.p2_pick === TIMED_OUT) && <p className="text-sm mb-2">{room.p1_pick === TIMED_OUT && room.p2_pick === TIMED_OUT ? "Both players ran out of time. No points awarded." : `${names[room.p1_pick === TIMED_OUT ? 0 : 1]} ran out of time. ${names[room.p1_pick === TIMED_OUT ? 1 : 0]} gets +1 point.`}</p>}
                     <p className="text-sm text-muted-foreground">{current.explain}</p>
                     <button
                       onClick={nextRound}

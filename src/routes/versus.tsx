@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { BattleTimePicker, BattleTimer } from "@/components/BattleTimer";
+import { battleSeconds, secondsLeft, roundPoints, TIMED_OUT } from "@/lib/versusRules";
 import { SUBJECTS } from "@/lib/subjects";
 import { QUESTIONS, type Question } from "@/lib/questions";
 import { Swords, Trophy, RotateCcw, ChevronRight, Crown, Wifi, Smartphone, ArrowRight } from "lucide-react";
@@ -13,6 +16,8 @@ export const Route = createFileRoute("/versus")({
       { name: "description", content: "Challenge a classmate. Take turns answering WAEC questions and see who wins." },
       { property: "og:title", content: "Versus — Scholly.AI" },
       { property: "og:description", content: "Pass the phone, answer the question, settle the score." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
@@ -43,6 +48,10 @@ function VersusPage() {
   const [scores, setScores] = useState<[number, number]>([0, 0]);
   const [picks, setPicks] = useState<[number | null, number | null]>([null, null]);
   const [restored, setRestored] = useState(false);
+  const [timeLimit, setTimeLimit] = useState(60);
+  const [deadline, setDeadline] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
+  const answerLock = useRef(false);
 
   // Restore an in-progress match (so leaving the page never resets the battle)
   useEffect(() => {
@@ -59,6 +68,8 @@ function VersusPage() {
           setTurn(s.turn ?? 0);
           setScores(s.scores ?? [0, 0]);
           setPicks(s.picks ?? [null, null]);
+          setTimeLimit(battleSeconds(s.timeLimit));
+          setDeadline(s.deadline ?? (s.phase === "answer" ? Date.now() + battleSeconds(s.timeLimit) * 1000 : null));
           setPhase(s.phase);
         }
       }
@@ -75,14 +86,14 @@ function VersusPage() {
       else
         localStorage.setItem(
           SAVE_KEY,
-          JSON.stringify({ p1, p2, subjectId, phase, questions, round, turn, scores, picks }),
+          JSON.stringify({ p1, p2, subjectId, phase, questions, round, turn, scores, picks, timeLimit, deadline }),
         );
     } catch {
       /* ignore */
     }
-  }, [restored, p1, p2, subjectId, phase, questions, round, turn, scores, picks]);
+  }, [restored, p1, p2, subjectId, phase, questions, round, turn, scores, picks, timeLimit, deadline]);
 
-  const subject = useMemo(() => SUBJECTS.find((s) => s.id === subjectId)!, [subjectId]);
+  const subject = useMemo(() => SUBJECTS.find((s) => s.id === subjectId) ?? SUBJECTS[0], [subjectId]);
   const names: [string, string] = [p1.trim() || "Player 1", p2.trim() || "Player 2"];
   const current = questions[round];
 
@@ -95,11 +106,15 @@ function VersusPage() {
     setTurn(0);
     setScores([0, 0]);
     setPicks([null, null]);
+    setDeadline(null);
     setPhase("ready");
   };
 
   const answer = (i: number) => {
-    if (phase !== "answer" || !current) return;
+    if (phase !== "answer" || !current || answerLock.current) return;
+    answerLock.current = true;
+    if (deadline !== null && Date.now() >= deadline) i = TIMED_OUT;
+    setDeadline(null);
     const nextPicks: [number | null, number | null] = [...picks] as [number | null, number | null];
     nextPicks[turn] = i;
     setPicks(nextPicks);
@@ -107,8 +122,9 @@ function VersusPage() {
     // If both players have answered, reveal
     if (nextPicks[0] !== null && nextPicks[1] !== null) {
       const nextScores: [number, number] = [...scores] as [number, number];
-      if (nextPicks[0] === current.answer) nextScores[0] += 1;
-      if (nextPicks[1] === current.answer) nextScores[1] += 1;
+      const points = roundPoints([nextPicks[0], nextPicks[1]], current.answer);
+      nextScores[0] += points[0];
+      nextScores[1] += points[1];
       setScores(nextScores);
       setPhase("reveal");
     } else {
@@ -117,6 +133,19 @@ function VersusPage() {
       setPhase("ready");
     }
   };
+
+  const remaining = secondsLeft(deadline, now);
+  useEffect(() => {
+    answerLock.current = false;
+    if (!restored || phase !== "answer" || deadline === null) return;
+    const tick = () => {
+      setNow(Date.now());
+      if (Date.now() >= deadline) answer(TIMED_OUT);
+    };
+    tick();
+    const interval = window.setInterval(tick, 250);
+    return () => clearInterval(interval);
+  }, [restored, phase, deadline, turn]);
 
   const next = () => {
     const isLastRound = round === ROUNDS - 1;
@@ -131,6 +160,7 @@ function VersusPage() {
   };
 
   const reset = () => {
+    setDeadline(null);
     setPhase("setup");
     setQuestions([]);
     setScores([0, 0]);
@@ -230,6 +260,7 @@ function VersusPage() {
               </div>
             </div>
 
+            <BattleTimePicker value={timeLimit} onChange={setTimeLimit} />
             <button
               onClick={start}
               className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-gold px-6 py-3.5 text-base font-semibold text-gold-foreground glow-gold hover:scale-[1.01] transition-transform"
@@ -292,7 +323,7 @@ function VersusPage() {
                     : "Answer the question. The other player will answer the same question next."}
                 </p>
                 <button
-                  onClick={() => setPhase("answer")}
+                  onClick={() => { answerLock.current = false; setNow(Date.now()); setDeadline(Date.now() + timeLimit * 1000); setPhase("answer"); }}
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-gold-foreground glow-gold hover:scale-[1.02] transition-transform"
                 >
                   I'm ready <ChevronRight className="h-4 w-4" />
@@ -300,6 +331,7 @@ function VersusPage() {
               </div>
             )}
 
+            {phase === "answer" && <BattleTimer remaining={remaining} />}
             {/* QUESTION */}
             {(phase === "answer" || phase === "reveal") && current && (
               <div className="rounded-3xl bg-gradient-card border border-border p-6">
@@ -319,7 +351,7 @@ function VersusPage() {
                     return (
                       <button
                         key={i}
-                        disabled={phase !== "answer"}
+                        disabled={phase !== "answer" || remaining === 0}
                         onClick={() => answer(i)}
                         className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all ${cls}`}
                       >
@@ -345,6 +377,7 @@ function VersusPage() {
                       {names[0]}: {picks[0] === current.answer ? "✓ +1" : "✗"} · {names[1]}:{" "}
                       {picks[1] === current.answer ? "✓ +1" : "✗"}
                     </div>
+                    {(picks[0] === TIMED_OUT || picks[1] === TIMED_OUT) && <p className="text-sm mb-2">{picks[0] === TIMED_OUT && picks[1] === TIMED_OUT ? "Both players ran out of time. No points awarded." : `${names[picks[0] === TIMED_OUT ? 0 : 1]} ran out of time. ${names[picks[0] === TIMED_OUT ? 1 : 0]} gets +1 point.`}</p>}
                     <p className="text-sm text-muted-foreground">{current.explain}</p>
                     <button
                       onClick={next}
