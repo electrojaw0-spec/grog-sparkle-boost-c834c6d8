@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { SUBJECTS } from "@/lib/subjects";
 import { QUESTIONS } from "@/lib/questions";
 import { supabase } from "@/integrations/supabase/client";
-import { Swords, Crown, Trophy, RotateCcw, ChevronRight, Copy, Wifi, Loader2, Check } from "lucide-react";
+import { Swords, Crown, Trophy, RotateCcw, ChevronRight, Copy, Wifi, Loader2, Check, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/versus-online")({
   component: OnlineVersusPage,
@@ -14,6 +15,8 @@ export const Route = createFileRoute("/versus-online")({
       { name: "description", content: "Challenge any classmate online. Share a 6-letter room code and battle in real time." },
       { property: "og:title", content: "Online Versus — Scholly.AI" },
       { property: "og:description", content: "Real-time WAEC quiz duels. Share a code, beat your friend." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
@@ -469,6 +472,12 @@ function OnlineVersusPage() {
             <div className="text-center text-xs text-muted-foreground mb-3">
               Round {room.current_round + 1} of {ROUNDS} · {subject.emoji} {subject.name} · Code{" "}
               <span className="font-semibold">{room.code}</span>
+            </div>
+
+            <div className="flex justify-center mb-4">
+              <Button variant="outline" size="sm" onClick={() => leaveRoom()}>
+                <LogOut aria-hidden="true" /> Quit battle
+              </Button>
             </div>
 
             {(room.phase === "answer" || room.phase === "reveal") && current && (
