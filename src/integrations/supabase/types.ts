@@ -201,7 +201,9 @@ export type Database = {
           id: string
           last_pick: number | null
           p1_pick: number | null
+          p1_secret_hash: string | null
           p2_pick: number | null
+          p2_secret_hash: string | null
           phase: string
           player1_name: string
           player2_name: string | null
@@ -221,7 +223,9 @@ export type Database = {
           id?: string
           last_pick?: number | null
           p1_pick?: number | null
+          p1_secret_hash?: string | null
           p2_pick?: number | null
+          p2_secret_hash?: string | null
           phase?: string
           player1_name: string
           player2_name?: string | null
@@ -241,7 +245,9 @@ export type Database = {
           id?: string
           last_pick?: number | null
           p1_pick?: number | null
+          p1_secret_hash?: string | null
           p2_pick?: number | null
+          p2_secret_hash?: string | null
           phase?: string
           player1_name?: string
           player2_name?: string | null
@@ -276,7 +282,9 @@ export type Database = {
           id: string
           last_pick: number | null
           p1_pick: number | null
+          p1_secret_hash: string | null
           p2_pick: number | null
+          p2_secret_hash: string | null
           phase: string
           player1_name: string
           player2_name: string | null
