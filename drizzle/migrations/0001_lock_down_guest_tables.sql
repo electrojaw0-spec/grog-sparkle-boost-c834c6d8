@@ -1,0 +1,12 @@
+ALTER TABLE public.versus_rooms ADD COLUMN IF NOT EXISTS p1_secret_hash text, ADD COLUMN IF NOT EXISTS p2_secret_hash text;
+DROP POLICY IF EXISTS "anyone can create rooms" ON public.versus_rooms;
+DROP POLICY IF EXISTS "anyone can delete old rooms" ON public.versus_rooms;
+DROP POLICY IF EXISTS "anyone can read rooms" ON public.versus_rooms;
+DROP POLICY IF EXISTS "anyone can update rooms" ON public.versus_rooms;
+GRANT ALL ON public.versus_rooms TO service_role;
+REVOKE EXECUTE ON FUNCTION public.submit_versus_answer(uuid,integer,integer,integer,integer) FROM anon, authenticated;
+DROP POLICY IF EXISTS "guest posts readable" ON public.posts;
+DROP POLICY IF EXISTS "guest likes readable" ON public.post_likes;
+DROP POLICY IF EXISTS "guest comments readable" ON public.post_comments;
+DROP POLICY IF EXISTS "guest profiles readable" ON public.profiles;
+GRANT ALL ON public.posts, public.post_likes, public.post_comments, public.profiles TO service_role;

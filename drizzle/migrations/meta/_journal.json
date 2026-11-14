@@ -8,6 +8,13 @@
       "when": 1794566234909,
       "tag": "0000_versus_timed_atomic_rounds",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794690724760,
+      "tag": "0001_lock_down_guest_tables",
+      "breakpoints": true
     }
   ]
 }
