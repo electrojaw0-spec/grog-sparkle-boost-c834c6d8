@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { InstallButton } from "@/components/InstallButton";
 import { SUBJECTS } from "@/lib/subjects";
-import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Heart, MessageCircle, Users } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Trophy, CheckCircle2, GraduationCap, Swords, Wifi, Users } from "lucide-react";
 import heroBg from "@/assets/hero-bg.png";
 
 
@@ -204,38 +204,6 @@ function HomePage() {
                 <span className="text-sm">{p}</span>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SUPPORT — Wave payment */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="relative overflow-hidden rounded-3xl border border-border p-8 md:p-10 text-center bg-[#0055FF]/10">
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#0055FF]/20 px-4 py-1.5 text-xs font-medium mb-4 text-[#0055FF]">
-              <Heart className="h-3.5 w-3.5" />
-              Support the project
-            </div>
-            <h3 className="font-display text-xl md:text-2xl font-bold">Support Scholly’s free student trial</h3>
-            <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
-              If Scholly helped you study, a voluntary contribution supports the free trial for other students.
-            </p>
-            <div className="mt-5 inline-flex flex-col items-center gap-2 rounded-2xl bg-[#0055FF]/10 border border-[#0055FF]/30 px-6 py-4 text-sm">
-              <p className="font-medium text-[#0055FF]">Send on Wave to</p>
-              <p className="font-display text-2xl font-bold text-white">+220 369 2876</p>
-              <p className="text-xs text-muted-foreground">Enter any amount, then message us on WhatsApp</p>
-            </div>
-            <a
-              href="https://wa.me/2203692876?text=Hi%20Scholly%20team"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline"
-            >
-              <MessageCircle className="h-3.5 w-3.5" /> Or reach us on WhatsApp
-            </a>
-            <p className="mt-3 text-xs text-muted-foreground">
-              100% voluntary · Tap the button, enter any amount
-            </p>
           </div>
         </div>
       </section>
