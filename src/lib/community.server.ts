@@ -121,3 +121,40 @@ export async function removeImage(auth: Auth, path: string) {
   await supabaseAdmin.storage.from(BUCKET).remove([path]);
   return { ok: true };
 }
+
+const POST_COLS = "id, author_id, content, image_path, subject_id, like_count, comment_count, created_at";
+
+export async function listPosts(before: string | null, limit: number) {
+  let q = supabaseAdmin.from("posts").select(POST_COLS).order("created_at", { ascending: false }).limit(limit);
+  if (before) q = q.lt("created_at", before);
+  const { data, error } = await q;
+  if (error) throw new Error("Could not load posts");
+  return data ?? [];
+}
+
+export async function listMyLikes(auth: Auth, postIds: string[]) {
+  const id = await requireDevice(auth.deviceId, auth.secret);
+  if (!postIds.length) return [] as string[];
+  const { data } = await supabaseAdmin.from("post_likes").select("post_id").in("post_id", postIds).eq("user_id", id);
+  return (data ?? []).map((r) => r.post_id);
+}
+
+export async function listComments(postId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("post_comments")
+    .select("id, post_id, author_id, content, image_path, created_at")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  if (error) throw new Error("Could not load comments");
+  return data ?? [];
+}
+
+export async function getProfiles(ids: string[]) {
+  if (!ids.length) return [];
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("id, display_name, avatar_id, school, course")
+    .in("id", ids);
+  return data ?? [];
+}

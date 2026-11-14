@@ -10,6 +10,10 @@ import {
   saveProfile,
   setLike,
   signImage,
+  listPosts,
+  listMyLikes,
+  listComments,
+  getProfiles,
 } from "./community.server";
 
 const auth = z.object({ deviceId: z.string().uuid(), secret: z.string().min(20).max(200) });
@@ -88,3 +92,19 @@ export const signImageFn = createServerFn({ method: "POST" })
 export const deleteImageFn = createServerFn({ method: "POST" })
   .inputValidator((d) => auth.extend({ path: z.string().max(300) }).parse(d))
   .handler(async ({ data }) => removeImage(data, data.path));
+
+export const listPostsFn = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ before: z.string().max(40).nullable(), limit: z.number().int().min(1).max(50) }).parse(d))
+  .handler(async ({ data }) => listPosts(data.before, data.limit));
+
+export const listMyLikesFn = createServerFn({ method: "POST" })
+  .inputValidator((d) => auth.extend({ postIds: z.array(z.string().uuid()).max(200) }).parse(d))
+  .handler(async ({ data }) => listMyLikes(data, data.postIds));
+
+export const listCommentsFn = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ postId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => listComments(data.postId));
+
+export const getProfilesFn = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ ids: z.array(z.string().uuid()).max(100) }).parse(d))
+  .handler(async ({ data }) => getProfiles(data.ids));
