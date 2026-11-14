@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { getGuest as getGuestRaw, saveGuest } from "@/lib/guest";
-import { saveProfileFn } from "@/lib/community.functions";
+import { saveProfileFn, getProfilesFn } from "@/lib/community.functions";
 import { getGuestAuth } from "@/lib/guest";
 
 export function getGuest() {
@@ -82,11 +81,8 @@ export async function fetchProfile(id: string): Promise<Profile | null> {
   if (profileCache.has(id)) return profileCache.get(id)!;
   if (pending.has(id)) return pending.get(id)!;
   const p: Promise<Profile | null> = (async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_id, school, course")
-      .eq("id", id)
-      .maybeSingle();
+    const rows = await getProfilesFn({ data: { ids: [id] } }).catch(() => []);
+    const data = (rows[0] as Profile | undefined) ?? null;
     if (data) profileCache.set(id, data as Profile);
     pending.delete(id);
     return (data as Profile | null) ?? null;

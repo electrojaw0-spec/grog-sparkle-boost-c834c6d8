@@ -6,8 +6,7 @@ import { PostImage } from "@/components/PostImage";
 import { useMyProfile, fetchProfile, type Profile } from "@/lib/profile";
 import { uploadPostImage } from "@/lib/postImage";
 import { getGuestAuth } from "@/lib/guest";
-import { createPostFn, deletePostFn, toggleLikeFn, createCommentFn, deleteCommentFn } from "@/lib/community.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { createPostFn, deletePostFn, toggleLikeFn, createCommentFn, deleteCommentFn, listPostsFn, listMyLikesFn, listCommentsFn } from "@/lib/community.functions";
 import { SUBJECTS } from "@/lib/subjects";
 import {
   Send,
@@ -89,15 +88,8 @@ function CommunityPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
 
   const loadPage = useCallback(async (before?: string) => {
-    let q = supabase
-      .from("posts")
-      .select("id, author_id, content, image_path, subject_id, like_count, comment_count, created_at")
-      .order("created_at", { ascending: false })
-      .limit(PAGE_SIZE);
-    if (before) q = q.lt("created_at", before);
-    const { data, error } = await q;
-    if (error) throw error;
-    return (data ?? []) as Post[];
+    const data = await listPostsFn({ data: { before: before ?? null, limit: PAGE_SIZE } });
+    return data as Post[];
   }, []);
 
   // Initial load
@@ -137,48 +129,28 @@ function CommunityPage() {
     }
     // Load my likes for visible posts
     const ids = posts.map((p) => p.id);
-    supabase
-      .from("post_likes")
-      .select("post_id")
-      .in("post_id", ids)
-      .eq("user_id", user.id)
-      .then(({ data }) => {
-        if (data) setMyLikes(new Set(data.map((r) => r.post_id)));
-      });
+    listMyLikesFn({ data: { ...getGuestAuth(), postIds: ids } })
+      .then((liked) => setMyLikes(new Set(liked)))
+      .catch(() => {});
   }, [posts, user, authors]);
 
-  // Realtime new posts
+  // Keep the newest posts fresh
   useEffect(() => {
-    const channel = supabase
-      .channel("posts_feed")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "posts" },
-        (payload) => {
-          const p = payload.new as Post;
-          setPosts((prev) => (prev.some((x) => x.id === p.id) ? prev : [p, ...prev]));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "posts" },
-        (payload) => {
-          const p = payload.old as { id: string };
-          setPosts((prev) => prev.filter((x) => x.id !== p.id));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "posts" },
-        (payload) => {
-          const p = payload.new as Post;
-          setPosts((prev) => prev.map((x) => (x.id === p.id ? { ...x, ...p } : x)));
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    const t = window.setInterval(async () => {
+      try {
+        const fresh = (await listPostsFn({ data: { before: null, limit: PAGE_SIZE } })) as Post[];
+        setPosts((prev) => {
+          const map = new Map(fresh.map((p) => [p.id, p]));
+          const newest = fresh.length ? fresh[fresh.length - 1].created_at : "";
+          const kept = prev
+            .filter((x) => map.has(x.id) || x.created_at < newest)
+            .map((x) => map.get(x.id) ?? x);
+          const added = fresh.filter((p) => !prev.some((x) => x.id === p.id));
+          return [...added, ...kept].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+        });
+      } catch { /* ignore */ }
+    }, 10000);
+    return () => clearInterval(t);
   }, []);
 
   // Infinite scroll sentinel
@@ -525,50 +497,25 @@ function Comments({ postId }: { postId: string }) {
 
   const [err, setErr] = useState<string | null>(null);
   const reload = async () => {
-    const { data } = await supabase
-      .from("post_comments")
-      .select("id, post_id, author_id, content, image_path, created_at")
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true })
-      .limit(200);
+    const data = await listCommentsFn({ data: { postId } }).catch(() => null);
     if (data) setComments(data as Comment[]);
   };
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("post_comments")
-        .select("id, post_id, author_id, content, image_path, created_at")
-        .eq("post_id", postId)
-        .order("created_at", { ascending: true })
-        .limit(200);
+      const data = await listCommentsFn({ data: { postId } }).catch(() => null);
       if (cancelled) return;
       setComments((data ?? []) as Comment[]);
       setLoading(false);
     })();
-    const ch = supabase
-      .channel(`post_comments_${postId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "post_comments", filter: `post_id=eq.${postId}` },
-        (payload) => {
-          const c = payload.new as Comment;
-          setComments((prev) => (prev.some((x) => x.id === c.id) ? prev : [...prev, c]));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "post_comments", filter: `post_id=eq.${postId}` },
-        (payload) => {
-          const c = payload.old as { id: string };
-          setComments((prev) => prev.filter((x) => x.id !== c.id));
-        },
-      )
-      .subscribe();
+    const t = window.setInterval(async () => {
+      const data = await listCommentsFn({ data: { postId } }).catch(() => null);
+      if (!cancelled && data) setComments(data as Comment[]);
+    }, 8000);
     return () => {
       cancelled = true;
-      supabase.removeChannel(ch);
+      clearInterval(t);
     };
   }, [postId]);
 
